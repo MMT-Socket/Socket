@@ -9,6 +9,8 @@
 #include <sstream>
 #include <iomanip>
 #include <cstdint>
+#include <fstream>
+#include <string.h>
 
 using namespace std;
 #pragma comment (lib, "Ws2_32.lib")
@@ -22,6 +24,7 @@ struct user {
     string birthdate;
     string fullname;
     string note;
+    string encry; //Y or N
 };
 struct client_type
 {
@@ -86,18 +89,104 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
             // tu day
             user info;
             int iResult = recv(new_client.socket, tempmsg, DEFAULT_BUFLEN, 0);
-            
+            // 1 - Log in
             if (hex_to_string(tempmsg) == "1")
             {
-                iResult = recv(new_client.socket, tempmsg, DEFAULT_BUFLEN, 0);             
-                info.account = hex_to_string(tempmsg);
-                
-
+                // Get user encry or not
                 iResult = recv(new_client.socket, tempmsg, DEFAULT_BUFLEN, 0);
-                info.password = hex_to_string(tempmsg);
-                cout << info.password << endl;
+                info.encry = hex_to_string(tempmsg);
+                if (info.encry == "Y")
+                {
+                    // Get account
+                    iResult = recv(new_client.socket, tempmsg, DEFAULT_BUFLEN, 0);             
+                    info.account = hex_to_string(tempmsg);
+                    cout << info.account<<endl;
+                    // Get password
+                    iResult = recv(new_client.socket, tempmsg, DEFAULT_BUFLEN, 0);
+                    info.password = hex_to_string(tempmsg);
+                    cout << info.password << endl;
+
+                    // Check Account and password exist or not
+                    string s;
+                    ifstream fin("Database.txt", ios::in);
+                    while (fin.is_open() && !fin.eof())
+                    {
+                        int count = 0;
+                        getline(fin,s, ',');
+                        if (s == info.account){
+                            count++;
+                        }
+                        getline(fin, s, ',');
+                        if (s == info.password) {
+                            count++;
+                        }
+                        getline(fin, s, ',');
+                        getline(fin, s, ',');
+                        getline(fin, s, '.');
+                        // If exist , send to user know
+                        if (count == 2)
+                        {
+                            msg = "Success";
+                            iResult = send(new_client.socket, msg.c_str(), strlen(msg.c_str()), 0);
+                            iResult = send(new_client.socket, msg.c_str(), strlen(msg.c_str()), 0);
+                        }         
+                    }
+
+                    
+                    closesocket(new_client.socket);
+                    closesocket(client_array[new_client.id].socket);
+                    client_array[new_client.id].socket = INVALID_SOCKET;
+                    msg = "Client #" + std::to_string(new_client.id) + " Disconnected";
+                    std::cout << msg << std::endl;
+
+                }
                 /*int iResult = recv(new_client.socket, tempmsg, DEFAULT_BUFLEN, 0);*/
                 
+            }
+            // Register
+            else if (hex_to_string(tempmsg) == "2")
+            {
+                iResult = recv(new_client.socket, tempmsg, DEFAULT_BUFLEN, 0);
+                info.encry = hex_to_string(tempmsg);
+                if (info.encry == "Y")
+                {
+                    iResult = recv(new_client.socket, tempmsg, DEFAULT_BUFLEN, 0);
+                    info.account = hex_to_string(tempmsg);
+                    cout << info.account << endl;
+
+                    iResult = recv(new_client.socket, tempmsg, DEFAULT_BUFLEN, 0);
+                    info.password = hex_to_string(tempmsg);
+                    cout << info.password << endl;
+                }
+                // write down database 
+                string comma = ",";
+                string dot = ".";
+                ofstream fout("Database.txt", ios::ate);
+                if (fout.is_open()) {
+                    info.account += ",";
+                    fout << info.account;
+                    info.password += ",";
+                    fout << info.password;
+                    fout << comma;
+                    fout << comma;
+                    fout << dot;
+                    fout.close();
+                }
+                else {
+                    cout << "can't open" << endl;
+                }
+                fout.close();
+
+                msg = "end";
+                iResult = send(new_client.socket, msg.c_str(), strlen(msg.c_str()), 0);
+                msg = "hello";
+                iResult = send(new_client.socket, msg.c_str(), strlen(msg.c_str()), 0);
+
+                closesocket(new_client.socket);
+                closesocket(client_array[new_client.id].socket);
+                client_array[new_client.id].socket = INVALID_SOCKET;
+                msg = "Client #" + std::to_string(new_client.id) + " Disconnected";
+                std::cout << msg << std::endl;
             }
             /*if (hex_to_string(tempmsg)=="end")
             {
