@@ -38,9 +38,11 @@ struct User {
     string Password;
     string Fullname = "";
     string Date = "";
+    string Note = "";
     string Point = "";
+    int online = 0;
     int Online_ID = -1;
-    int P2_ID = -1;
+    int Map_Status = 0;
 };
 
 int FlagRev(string s) {
@@ -56,6 +58,12 @@ int FlagRev(string s) {
     else if (s == "CHANGE_PASSWORD")
     {
         return 3;
+    }
+    else if (s.find("CHECK_USER") != -1) { // Fix by D
+        return 4;
+    }
+    else if (s.find("SETUP_INFO") != -1) { // Fix by D
+        return 5;
     }
     else if (s == "START_GAME")
     {
@@ -85,7 +93,23 @@ int FlagRev(string s) {
     {
         return 25; 
     }
-    //25
+    else if (s.find("ATTACK_SHIP ") != -1)
+    {
+        return 26; 
+    }
+    else if (s.find("PLAY_MORE") != -1)
+    {
+        return 27;
+    }
+    else if (s.find("LOSE_GAME") != -1)
+    {
+        return 28;
+    }
+    else if (s.find("ENCRYPT_") != -1)
+    {
+        return 29;
+    }
+
     else if (s == "LOGOUT")
     {
         return 100;
@@ -111,7 +135,6 @@ string FlagSend(int flag) {
     case 6:
         return "CHANGE_FAIL";
 
-
     // Game part
     case 7:
         return "ENOUGH_USER";
@@ -136,7 +159,10 @@ string FLag_Game_Sent(int flag) {
         return "REV_SEND_MAP";
     case 6: // Send map to compertitor
         return "UPLOAD_MAP";
+    case 7: // Notify to P is P's turn
+        return "MY_TURN";
     }
+
     return "";
 }
 string string_to_hex(const string& in) {
@@ -204,13 +230,22 @@ int SentMsg(SOCKET client, string msg) {
     return 1;
 
 }
-string RevEncrytMsg(SOCKET client) {
+string RevEncrytMsg(SOCKET client, bool encrypt) {
+    if (encrypt == true)
+    {
+        char tempmsg[DEFAULT_BUFLEN] = "";
+        memset(tempmsg, 0, DEFAULT_BUFLEN);
+        int iResults = recv(client, tempmsg, DEFAULT_BUFLEN, 0);
+        return hex_to_string(tempmsg);
+    }
+    else {
+        char tempmsg[DEFAULT_BUFLEN] = "";
+        memset(tempmsg, 0, DEFAULT_BUFLEN);
+        int iResults = recv(client, tempmsg, DEFAULT_BUFLEN, 0);
 
-    char tempmsg[DEFAULT_BUFLEN] = "";
-    memset(tempmsg, 0, DEFAULT_BUFLEN);
-    int iResults = recv(client, tempmsg, DEFAULT_BUFLEN, 0);
+        return tempmsg;
+    }
 
-    return hex_to_string(tempmsg);
 
 }
 void Write_User_Info_To_Database(vector<User> Database) {
@@ -219,16 +254,17 @@ void Write_User_Info_To_Database(vector<User> Database) {
     ofstream out(USER_INFO, ios::out);
     if (out.is_open())
     {
-        out._Seekbeg();
+        out._Seekbeg;
         for (int i = 0; i < Database.size(); i++)
         {
-            out << Database[i].Account << "-" << Database[i].Password << "-" << Database[i].Fullname << "-" << Database[i].Date << "-" << Database[i].Point;
-            if (i!=Database.size()-1)
+            out << Database[i].Account << "-" << Database[i].Password << "-" << Database[i].Fullname << "-" << Database[i].Date << "-" << Database[i].Point << "-" << Database[i].Note;
+            cout << Database[i].Account << "-" << Database[i].Password << "-" << Database[i].Fullname << "-" << Database[i].Date << "-" << Database[i].Point << "-" << Database[i].Note << "." << endl;
+            if (i != Database.size() - 1)
             {
                 out << endl;
             }
         }
-        out._Seekbeg();
+        out._Seekbeg;
     }
     out.close();
 
@@ -254,8 +290,11 @@ void Upload_Database(vector<User>& Database) {
         getline(in, s, '-');
         user.Date = s;
 
-        getline(in, s);
+        getline(in, s, '-');
         user.Point = s;
+
+        getline(in, s);
+        user.Note = s;
         if (user.Account != "" && user.Password != "")
         {
 
@@ -306,10 +345,10 @@ int Verify_Login(vector<User> Database,User user, bool flag) {
     return 3;
 }
 
-int Change_Info(vector<User>&  Database,User user, int flag) {
+int Change_Info(vector<User>& Database, User user, int flag) {
 
     string s;
-    
+
     switch (flag) {
     case 1: // CHANGE_PASSWORD
     {
@@ -325,23 +364,39 @@ int Change_Info(vector<User>&  Database,User user, int flag) {
         }
         break;
     }
+    case 2:     // Fix By D
+    {
+        int i = 0;
+        while (i < Database.size()) {
 
+            if (user.Account == Database[i].Account) {
+                Database[i].Fullname = user.Fullname;
+                Database[i].Date = user.Date;
+                Database[i].Note = user.Note;
+                Database[i].online = user.online;
+
+            }
+            i++;
+        }
+        break;
+    }
+    Write_User_Info_To_Database(Database);
     }
 
     //RIGISTER_SUCCESS
     return 1;
 }
-void Login(SOCKET client,vector<User>& Database,User& user, bool& success) {
+void Login(SOCKET client,vector<User>& Database,User& user, bool& success,bool encrypt) {
 
     
     string msg;
 
     // Rev Account
-    user.Account = RevEncrytMsg(client);
+    user.Account = RevEncrytMsg(client, encrypt);
     cout << user.Account<<endl;
 
     // Rev Password
-    user.Password = RevEncrytMsg(client);
+    user.Password = RevEncrytMsg(client, encrypt);
     cout << user.Password << endl;
 
     // Get Flag to respond to sever
@@ -360,23 +415,23 @@ void Login(SOCKET client,vector<User>& Database,User& user, bool& success) {
     {
         msg = FlagSend(flag);
         int Result = SentMsg(client, msg);
-        success == false;
+        success = false;
     }
         break;
     }
 }
 
-void Register(SOCKET client, vector<User>& Database) {
+void Register(SOCKET client, vector<User>& Database,bool encrypt) {
 
     string msg;
     User user;
 
     // Rev Account
-    user.Account = RevEncrytMsg(client);
+    user.Account = RevEncrytMsg(client, encrypt);
     cout << user.Account << endl;
 
     // Rev Password
-    user.Password = RevEncrytMsg(client);
+    user.Password = RevEncrytMsg(client, encrypt);
     cout << user.Password << endl;
 
     // Get Flag to respond to sever
@@ -403,19 +458,19 @@ void Register(SOCKET client, vector<User>& Database) {
 
 }
 
-void Change_Password(SOCKET client,vector<User>& Database, User& user) {
+void Change_Password(SOCKET client,vector<User>& Database, User& user,bool encrypt) {
 
     string msg;
     bool change = true;
     // Rev current Password 
-    msg = RevEncrytMsg(client);
+    msg = RevEncrytMsg(client, encrypt);
     if (msg != user.Password)
     {
         change = false;
     }
 
     // Rev Password
-    user.Password = RevEncrytMsg(client);
+    user.Password = RevEncrytMsg(client, encrypt);
     cout << user.Password << endl;
 
     // Update Database
@@ -433,9 +488,106 @@ void Change_Password(SOCKET client,vector<User>& Database, User& user) {
         // Sent Flag CHANE_FAIL to sever
         msg = FlagSend(6);
         int Result = SentMsg(client, msg);
+    }   
+}
+
+void Check_User(SOCKET client, vector<User> Database, User user, string message) {   // FIx by D
+    string option, username;
+    message = message.substr(strlen("CHECK_USER "));
+    cout << message << endl;
+    int pos = message.find(" ");
+    option = message.substr(0, pos);
+    username = message.substr(pos + 1);
+    string msg = "NotFound";
+    string sendmsg;
+    pos = -1;
+    for (int i = 0; i < Database.size(); ++i) {
+        if (Database[i].Account == username) {
+            pos = i;
+            break;
+        }
+    }
+    if (pos > -1) {
+        if (option.find("find") != -1) {
+            int count = 0;
+            for (int i = 0; i < Database.size(); ++i) {
+                if (Database[i].Account == username) {
+                    cout << "Exist The Account " << endl;
+                    int results = SentMsg(client, "CHECK_USER Exist");
+                    count++;
+                    break;
+                    return;
+                }
+            }
+            if (count != 1) {
+                cout << "Not have exist account" << endl;
+                int results = SentMsg(client, "NotExist");
+            }
+        }
+        else if (option.find("online") != -1) {
+            if (Database[pos].online == 1) {
+                int results = SentMsg(client, "CHECK_USER online");
+            }
+            else {
+                int results = SentMsg(client, "CHECK_USER offline");
+            }
+        }
+        else if (option.find("show_date") != -1) {
+            sendmsg = "CHECK_USER show_date " + Database[pos].Date;
+            int results = SentMsg(client, sendmsg);
+
+        }
+        else if (option.find("show_fullname") != -1) {
+            sendmsg = "CHECK_USER show_fullname " + Database[pos].Fullname;
+            int results = SentMsg(client, sendmsg);
+        }
+        else if (option.find("show_note") != -1) {
+            sendmsg = "CHECK_USER show_note " + Database[pos].Note;
+            int results = SentMsg(client, sendmsg);
+        }
+        else if (option.find("show_all") != -1) {
+            sendmsg = "CHECK_USER  show_all" + Database[pos].Date + " " + Database[pos].Fullname + " " + Database[pos].Note;
+            int results = SentMsg(client, sendmsg);
+        }
+        else if (option.find("show_point") != -1) {
+            sendmsg = "CHECK_USER show_point " + Database[pos].Point;
+            int results = SentMsg(client, sendmsg);
+        }
+        else {
+            cout << msg << endl;
+            int results = SentMsg(client, msg);
+        }
+    }
+    else {
+        int results = SentMsg(client, "NotExist");
+    }
+}
+void Setup_Info(SOCKET client, vector<User>& Database, string message, User& user) {  // Fix By D
+    string option, information;
+    message = message.substr(strlen("SETUP_INFO "));
+    cout << message << endl;
+    int pos = message.find(" ");
+    option = message.substr(0, pos);
+    information = message.substr(pos + 1);
+    string msg = "NotFound";
+    if (option.find("fullname") != -1) {
+        user.Fullname = information;
+        int results = SentMsg(client, "SETUP_INFO ");
+    }
+    else if (option.find("date") != -1) {
+        user.Date = information;
+        int results = SentMsg(client, "SETUP_INFO ");
+    }
+    else if (option.find("note") != -1) {
+        user.Note = information;
+        int results = SentMsg(client, "SETUP_INFO ");
+    }
+    else {
+        cout << msg << endl;
+        int results = SentMsg(client, msg);
     }
 
-      
+    Change_Info(Database, user, 2);
 }
 
 // ONLINE USER PART
@@ -457,7 +609,7 @@ void Add_User_Online_File(vector<User>& User_Online, User user,int id) {
                 User_Online[i].Online_ID = id;
             }
 
-            out << User_Online[i].Account << "/" << User_Online[i].Online_ID << "/" << User_Online[i].P2_ID;
+            out << User_Online[i].Account << "/" << User_Online[i].Online_ID << "/" << User_Online[i].Map_Status;
 
             if (i!= User_Online.size()-1)
             {
@@ -479,6 +631,7 @@ void Remove_Update_Online(vector<User>& User_Online, User user) {
         {
             User_Online.erase(User_Online.begin() + i);
         }
+        i++;
     }
 
     ofstream out(USER_ONLINE, ios::out);
@@ -488,7 +641,7 @@ void Remove_Update_Online(vector<User>& User_Online, User user) {
         out._Seekbeg();
         for (int i = 0; i < User_Online.size(); i++)
         {
-            out << User_Online[i].Account << "/" << User_Online[i].Online_ID << "/" << User_Online[i].P2_ID;
+            out << User_Online[i].Account << "/" << User_Online[i].Online_ID << "/" << User_Online[i].Map_Status;
             if (i != User_Online.size() - 1)
             {
                 out << endl;
@@ -500,6 +653,7 @@ void Remove_Update_Online(vector<User>& User_Online, User user) {
     out.close();
 
 }
+
 
 // Read online user from file 
 void Collect_Online_List(vector<User>& User_Online) {
@@ -522,7 +676,7 @@ void Collect_Online_List(vector<User>& User_Online) {
         cout << "id: " << stoi(s) << endl;
 
         getline(in, s);
-        user.P2_ID = stoi(s);
+        user.Map_Status = stoi(s);
         tmp.push_back(user);
 
     }
@@ -584,18 +738,26 @@ void Rev_Responding_to_user_is_choosen(SOCKET client, string msg,vector<client_t
     int RES = SentMsg(client_array[P2_ID].socket, msg);
 }
 
-void Update_UserOnlineList(vector<User>& OnlineUser,int P2_ID,int P1_ID) {
-    for (int i = 0; i < OnlineUser.size(); i++)
+void Update_Map_Status(vector<User>& User_Online,int P1_ID) {
+    User_Online[P1_ID].Map_Status = 1;
+
+    ofstream out(USER_ONLINE, ios::out);
+
+    if (out.is_open())
     {
-        if (OnlineUser[i].Online_ID == P1_ID)
+        out._Seekbeg();
+        for (int i = 0; i < User_Online.size(); i++)
         {
-            OnlineUser[i].P2_ID = P2_ID;
+            out << User_Online[i].Account << "/" << User_Online[i].Online_ID << "/" << User_Online[i].Map_Status;
+            if (i != User_Online.size() - 1)
+            {
+                out << endl;
+            }
         }
-        else if(OnlineUser[i].Online_ID == P2_ID)
-        {
-            OnlineUser[i].P2_ID = P1_ID;
-        }
+        out._Seekbeg();
+
     }
+    out.close();
 }
 
 void Get_P2_ID(string msg,int& P2_ID,string flag) {
@@ -623,6 +785,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
     std::string msg = "";
     bool Open = true;
     User user;
+    bool encrypt = true;
     cout << "Up_Load_Database" << endl;
     // Upload_Database 
     vector<User> Database;
@@ -642,18 +805,12 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
             break;
         }
         // Have Encry
-        msg = RevEncrytMsg(new_client.socket);
+        msg = RevEncrytMsg(new_client.socket, encrypt);
         cout <<"Client sent :"<< msg << endl;
         
         int flag = FlagRev(msg);
 
-        /*if (flag == 24)
-        {
-            if (UserOnline[P1_ID].P2_ID != -1 && UserOnline[P2_ID].P2_ID != -1)
-            {
-                flag = 25;
-            }
-        }*/
+        
         cout << flag << endl;
         switch (flag)
         {
@@ -661,7 +818,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
         case 1: //Login
         {
             bool success = true;
-            Login(new_client.socket,Database,user,success);
+            Login(new_client.socket,Database,user,success, encrypt);
 
             if (success)
             {
@@ -676,12 +833,22 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
         }
         case 2: // REGISTER
         {
-            Register(new_client.socket,Database);
+            Register(new_client.socket,Database, encrypt);
             break;
         }
         case 3: // CHANGE_PASSWORD
-            Change_Password(new_client.socket, Database, user);
+            Change_Password(new_client.socket, Database, user, encrypt);
             break;
+        case 4: {   // Fix By D
+
+            Check_User(new_client.socket, Database, user, msg);
+            break;
+        }
+        case 5: {   // Fix By D
+
+            Setup_Info(new_client.socket, Database, msg, user);
+            break;
+        }
         case 20: // START_GAME
         {
 
@@ -704,8 +871,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
         case 22: // P2 accept P1
         {
             // CREATE CONNECTION BETWEEN P1 AND P2
-            /*cout << "P1 Accesss P2" << endl;
-            Update_UserOnlineList(UserOnline, P2_ID, P1_ID);*/
+            /*cout << "P1 Accesss P2" << endl;*/
 
             Get_P2_ID(msg, P2_ID, "ACCEPT,P");
             msg = "COMPERTITOR_ACCEPT";
@@ -727,41 +893,107 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
         case 24: // Send Map and want P2 take back Map : REV_SEND_MAP
         {
             // FLAG + filename.txt
+            // Update P1 has Sent the Map
+            Collect_Online_List(UserOnline);
+            Update_Map_Status(UserOnline, P1_ID);
 
-            string flag_now = "UPLOAD_MAP";
+            if (UserOnline[P1_ID].Map_Status == UserOnline[P2_ID].Map_Status)
+            {
+                // Flag 25: Send Map and start game : UPLOAD_MAP
 
-            string flag_send = "REV_SEND_MAP";
+                // FLAG + filename.txt
+
+                cout << "Send Map and start game" << endl;
+
+                int Result = SentMsg(client_array[P2_ID].socket, msg);
+            }
+            else
+            {
+                string flag_now = "UPLOAD_MAP";
+
+                string flag_send = "REV_SEND_MAP";
+
+                msg = msg.erase(0, flag_now.size());
+
+                msg = flag_send + msg;
+
+                cout << "Send Map and want P2 take back Map" << endl;
+
+                int Result = SentMsg(client_array[P2_ID].socket, msg);
+
+            }
             
-            msg = msg.erase(0, flag_now.size());
-
-            msg = flag_send + msg;
-
-            cout << "Send Map and want P2 take back Map" << endl;
-
-            int Result = SentMsg(client_array[P2_ID].socket, msg);
-
-            Update_UserOnlineList(UserOnline, P2_ID, P1_ID);
             break;
         }
-        case 25: // Send Map and start game : UPLOAD_MAP
+        case 26: // Seen P1 Attack back to P1 client then  Notify to P2's turn
         {
-            // FLAG + filename.txt
+            // Sent P1 Attack back to P1 client
+            int Result = SentMsg(client_array[P1_ID].socket, msg);
+            cout << "Sent P1 Attack back to P1 client" << endl;
+            // Notify to P2's turn
+            msg = FLag_Game_Sent(7);
+            Result = SentMsg(client_array[P2_ID].socket,msg);
+            cout << "Notify to P2's turn" << endl;
 
-            cout << "Send Map and start game" << endl;
+            break;
+        }
+        case 27: // START_GAME _ PLAY_MORE
+        {
+            
 
+            cout << "Prepare Userlist again" << endl;
+            Collect_Online_List(UserOnline);
+
+            cout << "Starting send messs" << endl;
+            Send_Online_User(new_client.socket, UserOnline);
+
+            break;
+        }
+        case 28: // Notifi P1 WIN to P2
+        {
+            int num;
+            if (Database[P1_ID].Point == "")
+            {
+                num = 0;
+            }
+            else {
+                num = stoi(Database[P1_ID].Point);
+            }
+            Database[P1_ID].Point = to_string(num + 1);
+
+            msg = "LOSE_GAME";
             int Result = SentMsg(client_array[P2_ID].socket, msg);
+
+            break;
+        }
+        case 29: // Encrypt
+        {
+            string s = "ENCRYPT_";
+            msg = msg.erase(0, s.size());
+            if (msg == "Y")
+            {
+                encrypt = true;
+            }
+            else
+            {
+                encrypt = false;
+            }
+
             break;
         }
         case 100://  LOGOUT  : Shut down client
         {
+            user.online = 0;
+            Change_Info(Database, user, 2);
             // Updata Database before shutdow
             Write_User_Info_To_Database(Database);
             
+            /*Collect_Online_List(UserOnline);*/
             // Remove User online before shutdown
             Remove_Update_Online(UserOnline, user);
 
             int Result = SentMsg(new_client.socket, FlagSend(100));
-
+            cout << "sent flag log out to p1" << endl;
             msg = "Client #" + std::to_string(new_client.id) + " Disconnected";
 
             std::cout << msg << std::endl;
@@ -771,11 +1003,11 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
             client_array[new_client.id].socket = INVALID_SOCKET;
 
             //Broadcast the disconnection message to the other clients
-            for (int i = 0; i < MAX_CLIENTS; i++)
+            /*for (int i = 0; i < MAX_CLIENTS; i++)
             {
                 if (client_array[i].socket != INVALID_SOCKET)
                     int iResult = send(client_array[i].socket, msg.c_str(), strlen(msg.c_str()), 0);
-            }
+            }*/
             Open = false;
             break;
         }   
