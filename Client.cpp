@@ -442,6 +442,8 @@ void SetUp_Info(SOCKET& client, bool encrypt) {
     SentEncrytMsg(client, sent_message, encrypt);
 }
 // Game Part
+
+
 void Add_User_Online_List(string s, vector<string>& user) {
 
     string tmp = "ONLINE_LIST";
@@ -530,6 +532,12 @@ int Get_P1_ID(string msg) {
 
     return  stoi(msg);
 
+}
+
+void CREATE_ROOM(SOCKET client, string sent_message, bool encrypt,int& P2_ID) {
+    Clean(1);
+    Choose_user_play_with(client, sent_message, encrypt);
+    P2_ID = Get_P2_ID(sent_message);
 }
 
 void Upload_Map() {
@@ -1301,9 +1309,7 @@ void Running() {
         }
         case 21: // CREATE ROOM and  CHOOSE USER
         {
-            Clean(1);
-            Choose_user_play_with(client.socket, sent_message, encrypt);
-            P2_ID = Get_P2_ID(sent_message); 
+            CREATE_ROOM(client.socket, sent_message, encrypt,P2_ID);
 
             break;
         }
