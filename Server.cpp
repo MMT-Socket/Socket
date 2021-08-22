@@ -236,16 +236,22 @@ string RevEncrytMsg(SOCKET client, bool encrypt) {
         char tempmsg[DEFAULT_BUFLEN] = "";
         memset(tempmsg, 0, DEFAULT_BUFLEN);
         int iResults = recv(client, tempmsg, DEFAULT_BUFLEN, 0);
+        cout << endl;
+        cout << "===" << endl;
+        cout << tempmsg << endl;
+        cout << "===" << endl;
         return hex_to_string(tempmsg);
     }
     else {
         char tempmsg[DEFAULT_BUFLEN] = "";
         memset(tempmsg, 0, DEFAULT_BUFLEN);
         int iResults = recv(client, tempmsg, DEFAULT_BUFLEN, 0);
-
+        cout << endl;
+        cout << "===" << endl;
+        cout << tempmsg << endl;
+        cout << "===" << endl;
         return tempmsg;
     }
-
 
 }
 void Write_User_Info_To_Database(vector<User> Database) {
@@ -1019,8 +1025,8 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
     return 0;
 }
 
-int main()
-{
+
+void Run() {
     WSADATA wsaData;
     struct addrinfo hints;
     struct addrinfo* server = NULL;
@@ -1129,5 +1135,10 @@ int main()
     std::cout << "Program has ended successfully" << std::endl;
 
     system("pause");
+}
+int main()
+{
+    Run();
+
     return 0;
 }
