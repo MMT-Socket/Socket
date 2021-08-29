@@ -15,11 +15,11 @@
 #include <conio.h>
 
 using namespace std;
-
+#pragma warning(disable : 4996)
 #pragma comment (lib, "Ws2_32.lib")
 
 #define DEFAULT_BUFLEN 512
-#define IP_ADDRESS "192.168.1.7"
+#define IP_ADDRESS "192.168.100.8"
 #define DEFAULT_PORT "3504"
 
 struct client_type
@@ -39,7 +39,7 @@ struct coord
 int FlagRev(string s) {
     // Game part
     // Take User online list 
-    if (s.find("ENOUGH_USER") != -1 )
+    if (s.find("ENOUGH_USER") != -1)
     {
         return 22;
     }
@@ -83,7 +83,7 @@ int FlagRev(string s) {
     {
         return 30;
     }
-    
+
     // Sign and user info part
     else if (s == "LOGIN_SUCCESS")
     {
@@ -136,13 +136,13 @@ int FlagGameSend(string s) {
     // Format CREATE_ROOM (room_number) (User_ID) 
     if (s == "YES")
     {
-    return 26;
+        return 26;
     }
     else if (s == "NO")
     {
-    return 27;
+        return 27;
     }
-    if (s.find( "CREATE_ROOM") != -1)
+    if (s.find("CREATE_ROOM") != -1)
     {
         return 21;
     }
@@ -263,7 +263,7 @@ string hex_to_string(const string& in) {
     return output;
 }
 
-void SentEncrytMsg(SOCKET client, string msg,bool encrypt) {
+void SentEncrytMsg(SOCKET client, string msg, bool encrypt) {
     // Encry before sent
     if (encrypt == true)
     {
@@ -347,25 +347,48 @@ void Shutdown(SOCKET& client) {
 
 void InputPassword(SOCKET& client, bool encrypt) {
     string sent_message;
-    cout << setw(70)<< "Input Password:" << endl;
+    cout << setw(70) << "Input Password:" << endl;
     cout << setw(56) << "=>>";
 
-    char p[100];
+    /*char p[100];
     int i = 0;
     while ((p[i] = _getch()) != 13 && i++ < 15) {
         if (i > 1) printf("\b\b");
         printf("* %d", i);
     }
-    p[i] = '\0';
+    p[i] = '\0';*/
+    char ch;
+    char buf[100] = { 0 };
+    //int count = 1;
+    int i;
+    for (i = 0; i < 100; i++)
+    {
+        ch = getch();
+
+        if (ch == 13)break;//13=Enter
+        if (ch == 27)exit(0);//27=ESC
+        if (ch == 8)//Backspace
+        {
+            i--;
+            if (i < 0)continue;
+            buf[i--] = 0;
+            cprintf("%c", char(8));
+            cprintf("%c", char(32));
+            cprintf("%c", char(8));
+            continue;
+        }
+        printf("*");
+        buf[i] = ch;
+    }
     sent_message.resize(i);
     for (int u = 0; u < i; u++)
     {
-        sent_message[u] = p[u];
+        sent_message[u] = buf[u];
     }
     SentEncrytMsg(client, sent_message, encrypt);
 }
 
-void Login(SOCKET& client,bool encrypt) {
+void Login(SOCKET& client, bool encrypt) {
 
     Clean(1);
 
@@ -385,7 +408,7 @@ void Login(SOCKET& client,bool encrypt) {
 
 }
 
-void Register(SOCKET& client,bool encrypt) {
+void Register(SOCKET& client, bool encrypt) {
 
     Clean(1);
 
@@ -405,7 +428,7 @@ void Register(SOCKET& client,bool encrypt) {
 
 }
 
-void Change_Password(SOCKET& client,bool encrypt) {
+void Change_Password(SOCKET& client, bool encrypt) {
 
     string sent_message = FlagSend(3);
     // Send Flag CHANGE_PASSWORD
@@ -416,13 +439,13 @@ void Change_Password(SOCKET& client,bool encrypt) {
     cout << setw(70) << "Input Current Password " << endl;
     cout << setw(60) << "=>>  ";
     getline(cin, sent_message);
-    SentEncrytMsg(client, sent_message,encrypt);
+    SentEncrytMsg(client, sent_message, encrypt);
 
     //  Input Password
     InputPassword(client, encrypt);
 }
 
-void Check_User(SOCKET& client,bool encrypt) {
+void Check_User(SOCKET& client, bool encrypt) {
     cout << "Format For User Declarations:" << endl;
     cout << "[-option] [username]" << endl;
     cout << "CHECK USER: ";
@@ -447,54 +470,54 @@ void SetUp_Info(SOCKET& client, bool encrypt) {
 void Add_User_Online_List(string s, vector<string>& user) {
 
     string tmp = "ONLINE_LIST";
-    s = s.erase(0,tmp.size());
+    s = s.erase(0, tmp.size());
 
     tmp = "ENOUGH_USER";
     if (s.find("ENOUGH_USER") != -1)
     {
         s = s.erase(s.size() - tmp.size(), tmp.size());
     }
-    
-    user.push_back(s);   
+
+    user.push_back(s);
 }
 
-void Show_User_Online(vector<string>& user,int IDHOST) {
+void Show_User_Online(vector<string>& user, int IDHOST) {
     Clean(0);
     for (int i = 0; i < user.size(); i++)
     {
-        
-        cout << setw(50) << "P" << i  << ":" << user[i];
+
+        cout << setw(50) << "P" << i << ":" << user[i];
         if (i == IDHOST)
         {
             cout << "(It's you)";
         }
-        cout<< endl;
+        cout << endl;
     }
     cout << setw(50) << "CREATE_ROOM (room_number) (User_ID)" << endl;
-    cout << setw(50) <<"=>>";
+    cout << setw(50) << "=>>";
 }
 
-void Choose_user_play_with(SOCKET client,string msg,bool encrypt) {
+void Choose_user_play_with(SOCKET client, string msg, bool encrypt) {
     // Sent to sever the choosen
-    
+
     SentEncrytMsg(client, msg, encrypt);
 
     Clean(1);
     cout << setw(70) << "WATING THE P2 RESPONDING ....." << endl;
 }
 
-void P1_INVITE_TO_PLAY( string msg) {
+void P1_INVITE_TO_PLAY(string msg) {
 
     string s = "INVITE";
     // Cut off the flag
-    msg = msg.erase(0,s.size());
+    msg = msg.erase(0, s.size());
     s = msg[0];
     int P1_ID = stoi(s);
-    msg = msg.erase(0,1);
+    msg = msg.erase(0, 1);
 
     // the mess will like : "P1_name"
 
-    cout << setw(50) << "==THE P"<<P1_ID<<" : " << msg << " INVITE YOU TO PLAY==" << endl;
+    cout << setw(50) << "==THE P" << P1_ID << " : " << msg << " INVITE YOU TO PLAY==" << endl;
     cout << endl;
     cout << setw(90) << "ACCEPT,P(COMPETITOR_ID) / REJECT,P(COMPETITOR_ID) " << endl;
     cout << setw(50) << "=>>";
@@ -517,7 +540,7 @@ int Get_P2_ID(string msg) {
 
 
     // Now the mess like : "(room_number) User2_ID"
- 
+
     return  stoi(msg);
 
 }
@@ -526,7 +549,7 @@ int Get_P1_ID(string msg) {
 
     string s = "ACCEPT,P";
     // Cut off the flag CREATE_ROOM
-    msg.erase(0, s.size() );
+    msg.erase(0, s.size());
 
     // Now the mess like : UserP1_ID"
 
@@ -534,14 +557,14 @@ int Get_P1_ID(string msg) {
 
 }
 
-void CREATE_ROOM(SOCKET client, string sent_message, bool encrypt,int& P2_ID) {
+void CREATE_ROOM(SOCKET client, string sent_message, bool encrypt, int& P2_ID) {
     Clean(1);
     Choose_user_play_with(client, sent_message, encrypt);
     P2_ID = Get_P2_ID(sent_message);
 }
 
 void Upload_Map() {
-    
+
     cout << setw(72) << "=====UPLOAD_MAP=====" << endl;
     cout << endl;
     cout << setw(72) << "(Namefile.txt)      " << endl;
@@ -797,7 +820,7 @@ void Init_Game_Play(vector<vector<int>>& Ships, vector<vector<int>>& pos, vector
 }
 void Introduce(vector<vector<int>>& pos, vector<vector<char>>& Pseudo_gui, int& n) {
     cout << endl;
-    cout << setw(10) << "Number of ships to be sunk: 12"  << endl;
+    cout << setw(10) << "Number of ships to be sunk: 12" << endl;
     cout << endl;
 
     draw_gui(Pseudo_gui, pos, n);
@@ -840,9 +863,9 @@ int ReceviedMessage(client_type& new_client)
     // Game play
     vector<vector<int>> Ships;
     vector<vector<int>> pos;
-    vector<vector<char>> Pseudo_gui; 
-    int n; 
-    int shipcount = 0; 
+    vector<vector<char>> Pseudo_gui;
+    int n;
+    int shipcount = 0;
     string filename;
     coord coords;
     int x_count;
@@ -1016,9 +1039,9 @@ int ReceviedMessage(client_type& new_client)
             cout << setw(70) << "===COMPERTITOR_ACCEPT===" << endl;
 
             Clean(2);
-            
+
             Upload_Map();
-            
+
         }
         break;
         case 25: // COMPERTITOR_REJECT
@@ -1035,7 +1058,7 @@ int ReceviedMessage(client_type& new_client)
         case 26: // P2 REV P1's MAP and send P2's MAP to P1
         {
             string flagname = "REV_SEND_MAP";
-            filename = msg.erase(0,flagname.size());
+            filename = msg.erase(0, flagname.size());
             cout << setw(70) << "=WELCOME_TO_BATTLE_SHIP1=" << endl;
             Clean(2);
 
@@ -1050,7 +1073,7 @@ int ReceviedMessage(client_type& new_client)
             Clean(1);
 
             string flagname = "UPLOAD_MAP";
-            filename = msg.erase(0,flagname.size());
+            filename = msg.erase(0, flagname.size());
 
             cout << setw(70) << "=WELCOME_TO_BATTLE_SHIP2=" << endl;
             Clean(2);
@@ -1066,18 +1089,18 @@ int ReceviedMessage(client_type& new_client)
             Clean(1);
 
             string flagname = "ATTACK_SHIP ";
-            msg = msg.erase(0,flagname.size());
+            msg = msg.erase(0, flagname.size());
 
             Get_Attack_Coords(msg, coords);
             cout << "Get coords" << endl;
-            Game_Play(Ships, pos, Pseudo_gui, n, coords, shipcount, x_count); 
+            Game_Play(Ships, pos, Pseudo_gui, n, coords, shipcount, x_count);
 
 
         }
         break;
         case 29: // P2 Attack first time
         {
- 
+
 
             Clean(2);
 
@@ -1088,7 +1111,7 @@ int ReceviedMessage(client_type& new_client)
                 SentEncrytMsg(new_client.socket, msg, encrypt);
                 cout << setw(70) << "=====You are Champion!====" << endl;
                 Clean(2);
-                cout << setw(70) << "Keep playing (YES/NO)"        << endl;
+                cout << setw(70) << "Keep playing (YES/NO)" << endl;
                 Clean(2);
                 cout << setw(70) << " =>>";
 
@@ -1111,7 +1134,7 @@ int ReceviedMessage(client_type& new_client)
             Clean(2);
             cout << setw(70) << "Keep playing (YES/NO)" << endl;
             Clean(2);
-            cout << setw(70)<< " =>>";
+            cout << setw(70) << " =>>";
 
         }
         break;
@@ -1249,15 +1272,15 @@ void Running() {
     // Show Login and Register menu
     Login_Register_Menu();
     while (1) {
-        
+
         if (Open == false)
         {
             break;
         }
         // Setup the Flag
         getline(cin, sent_message);
-        int flag ;
-   
+        int flag;
+
         if (FlagGameSend(sent_message) > 0)
         {
             flag = FlagGameSend(sent_message);
@@ -1309,17 +1332,17 @@ void Running() {
         }
         case 21: // CREATE ROOM and  CHOOSE USER
         {
-            CREATE_ROOM(client.socket, sent_message, encrypt,P2_ID);
+            CREATE_ROOM(client.socket, sent_message, encrypt, P2_ID);
 
             break;
         }
         case 22: // ACCEPT OFFER:  "ACCEPT,P..."
-        { 
+        {
             Clean(1);
             P2_ID = Get_P1_ID(sent_message);
-            
+
             // FLAG + P2_ID
-            
+
             SentEncrytMsg(client.socket, sent_message, encrypt);
 
             /*Upload_Map();*/
@@ -1333,7 +1356,7 @@ void Running() {
             P2_ID = Get_P1_ID(sent_message);
 
             // FLAG + P2_ID
-            
+
             SentEncrytMsg(client.socket, sent_message, encrypt);
             Clean(1);
             OpenMenu();
@@ -1343,7 +1366,7 @@ void Running() {
         {
             // FLAG + filename.txt
 
-            sent_message =  "UPLOAD_MAP" + sent_message;
+            sent_message = "UPLOAD_MAP" + sent_message;
 
             SentEncrytMsg(client.socket, sent_message, encrypt);
             if (wating_send_map == true)
@@ -1354,13 +1377,13 @@ void Running() {
         }
         case 25: // P1 Attack first time
         {
-            
+
             SentEncrytMsg(client.socket, sent_message, encrypt);
             break;
         }
         case 26: // Play more
         {
-            sent_message = "PLAY_MORE"+sent_message;
+            sent_message = "PLAY_MORE" + sent_message;
             SentEncrytMsg(client.socket, sent_message, encrypt);
             break;
         }
