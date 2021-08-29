@@ -1001,7 +1001,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
             // Updata Database before shutdow
             Write_User_Info_To_Database(Database);
 
-            /*Collect_Online_List(UserOnline);*/
+            Collect_Online_List(UserOnline);
             // Remove User online before shutdown
             Remove_Update_Online(UserOnline, user);
 
