@@ -17,7 +17,7 @@ using namespace std;
 #pragma comment (lib, "Ws2_32.lib")
 #pragma warning(disable : 4996)
 
-#define IP_ADDRESS "192.168.100.8"
+#define IP_ADDRESS "192.168.1.7"
 #define DEFAULT_PORT "3504"
 #define DEFAULT_BUFLEN 512
 
@@ -44,6 +44,9 @@ struct User {
     int Online_ID = -1;
     int Map_Status = 0;
 };
+
+const char OPTION_VALUE = 1;
+const int MAX_CLIENTS = 5;
 
 int FlagRev(string s) {
 
@@ -200,8 +203,6 @@ string hex_to_string(const string& in) {
 }
 
 
-const char OPTION_VALUE = 1;
-const int MAX_CLIENTS = 5;
 
 int SentEncrytMsg(SOCKET client, string msg) {
 
@@ -260,7 +261,7 @@ void Write_User_Info_To_Database(vector<User> Database) {
     ofstream out(USER_INFO, ios::out);
     if (out.is_open())
     {
-        out._Seekbeg;
+       /* out._Seekbeg;*/
         for (int i = 0; i < Database.size(); i++)
         {
             out << Database[i].Account << "-" << Database[i].Password << "-" << Database[i].Fullname << "-" << Database[i].Date << "-" << Database[i].Point << "-" << Database[i].Note;
@@ -270,7 +271,7 @@ void Write_User_Info_To_Database(vector<User> Database) {
                 out << endl;
             }
         }
-        out._Seekbeg;
+        /*out._Seekbeg;*/
     }
     out.close();
 
@@ -450,6 +451,8 @@ void Register(SOCKET client, vector<User>& Database, bool encrypt) {
         // Update user into database
         cout << "Up_Load_Database" << endl;
         Database.push_back(user);
+
+
         msg = FlagSend(flag);
         int Result = SentMsg(client, msg);
     }
@@ -606,7 +609,7 @@ void Add_User_Online_File(vector<User>& User_Online, User user, int id) {
 
     if (out.is_open())
     {
-        out._Seekbeg();
+        /*out._Seekbeg();*/
         // Format file USER_ONLINE.txt : Username-ONLINE_ID
         for (int i = 0; i < User_Online.size(); i++)
         {
@@ -622,7 +625,7 @@ void Add_User_Online_File(vector<User>& User_Online, User user, int id) {
                 out << endl;
             }
         }
-        out._Seekbeg();
+        /*out._Seekbeg();*/
 
     }
     out.close();
@@ -644,7 +647,7 @@ void Remove_Update_Online(vector<User>& User_Online, User user) {
 
     if (out.is_open())
     {
-        out._Seekbeg();
+        /*out._Seekbeg();*/
         for (int i = 0; i < User_Online.size(); i++)
         {
             out << User_Online[i].Account << "/" << User_Online[i].Online_ID << "/" << User_Online[i].Map_Status;
@@ -653,7 +656,7 @@ void Remove_Update_Online(vector<User>& User_Online, User user) {
                 out << endl;
             }
         }
-        out._Seekbeg();
+        /*out._Seekbeg();*/
 
     }
     out.close();
@@ -675,6 +678,10 @@ void Collect_Online_List(vector<User>& User_Online) {
 
         getline(in, s, '/');
         user.Account = s;
+        if (s == "")
+        {
+            return;
+        }
         cout << "user: " << s << endl;
 
         getline(in, s, '/');
@@ -751,7 +758,7 @@ void Update_Map_Status(vector<User>& User_Online, int P1_ID) {
 
     if (out.is_open())
     {
-        out._Seekbeg();
+        /*out._Seekbeg();*/
         for (int i = 0; i < User_Online.size(); i++)
         {
             out << User_Online[i].Account << "/" << User_Online[i].Online_ID << "/" << User_Online[i].Map_Status;
@@ -760,7 +767,7 @@ void Update_Map_Status(vector<User>& User_Online, int P1_ID) {
                 out << endl;
             }
         }
-        out._Seekbeg();
+        /*out._Seekbeg();*/
 
     }
     out.close();
