@@ -973,6 +973,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
         }
         case 28: // Notifi P1 WIN to P2 and count point for P1
         {
+            Upload_Database(Database);
             int num;
             if (Database[P1_ID].Point == "")
             {
