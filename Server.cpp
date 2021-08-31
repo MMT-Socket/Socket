@@ -279,7 +279,7 @@ void Write_User_Info_To_Database(vector<User> Database) {
 
 // SIGN AND INFO PART
 void Upload_Database(vector<User>& Database) {
-
+    Database.resize(0);
     string s;
     User user;
     ifstream in(USER_INFO, ios::in);
@@ -354,6 +354,8 @@ int Verify_Login(vector<User> Database, User user, bool flag) {
 
 int Change_Info(vector<User>& Database, User user, int flag) {
 
+    Upload_Database(Database);
+    
     string s;
 
     switch (flag) {
@@ -388,6 +390,7 @@ int Change_Info(vector<User>& Database, User user, int flag) {
         break;
     }
     Write_User_Info_To_Database(Database);
+    Upload_Database(Database);
     }
 
     //RIGISTER_SUCCESS
@@ -451,7 +454,8 @@ void Register(SOCKET client, vector<User>& Database, bool encrypt) {
         // Update user into database
         cout << "Up_Load_Database" << endl;
         Database.push_back(user);
-
+        Write_User_Info_To_Database(Database);
+        Upload_Database(Database);
 
         msg = FlagSend(flag);
         int Result = SentMsg(client, msg);
@@ -830,6 +834,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 
         case 1: //Login
         {
+            Upload_Database(Database);
             bool success = true;
             Login(new_client.socket, Database, user, success, encrypt);
 
@@ -846,10 +851,12 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
         }
         case 2: // REGISTER
         {
+            Upload_Database(Database);
             Register(new_client.socket, Database, encrypt);
             break;
         }
         case 3: // CHANGE_PASSWORD
+            Upload_Database(Database);
             Change_Password(new_client.socket, Database, user, encrypt);
             break;
         case 4: {   // Fix By D
@@ -962,7 +969,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 
             break;
         }
-        case 28: // Notifi P1 WIN to P2
+        case 28: // Notifi P1 WIN to P2 and count point for P1
         {
             int num;
             if (Database[P1_ID].Point == "")
@@ -972,7 +979,11 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
             else {
                 num = stoi(Database[P1_ID].Point);
             }
+
             Database[P1_ID].Point = to_string(num + 1);
+            //Update point to database
+            Write_User_Info_To_Database(Database);
+            Upload_Database(Database);
 
             msg = "LOSE_GAME";
             int Result = SentMsg(client_array[P2_ID].socket, msg);
@@ -996,13 +1007,18 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
         }
         case 100://  LOGOUT  : Shut down client
         {
-            user.online = 0;
+            Upload_Database(Database);
+
+            user.online = 0;         
             Change_Info(Database, user, 2);
+
             // Updata Database before shutdow
+
             Write_User_Info_To_Database(Database);
 
-            Collect_Online_List(UserOnline);
+
             // Remove User online before shutdown
+            Collect_Online_List(UserOnline);
             Remove_Update_Online(UserOnline, user);
 
             int Result = SentMsg(new_client.socket, FlagSend(100));

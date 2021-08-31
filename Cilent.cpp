@@ -525,6 +525,7 @@ void Show_User_Online(vector<string>& user, int IDHOST) {
     }
     cout << setw(50) << "CREATE_ROOM (room_number) (User_ID)" << endl;
     cout << setw(50) << "=>>";
+    user.resize(0);
 }
 
 void Choose_user_play_with(SOCKET client, string msg, bool encrypt) {
@@ -1114,7 +1115,7 @@ int ReceviedMessage(client_type& new_client)
 
         }
         break;
-        case 28: // Attack first time
+        case 28: // show map of P2 is attacked
         {
             Clean(1);
 
@@ -1128,12 +1129,12 @@ int ReceviedMessage(client_type& new_client)
 
         }
         break;
-        case 29: // P2 Attack first time
+        case 29: // P2 Attack back P1 and so on
         {
 
 
             Clean(2);
-
+            // When P1 win the game
             if (shipcount <= 10)
             {
                 Clean(1);
@@ -1152,7 +1153,7 @@ int ReceviedMessage(client_type& new_client)
 
         }
         break;
-        case 30: // LOSE_GAME
+        case 30: // P2 LOSE_GAME
         {
 
 
