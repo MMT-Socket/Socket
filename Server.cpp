@@ -389,10 +389,10 @@ int Change_Info(vector<User>& Database, User user, int flag) {
         }
         break;
     }
+    
+    }
     Write_User_Info_To_Database(Database);
     Upload_Database(Database);
-    }
-
     //RIGISTER_SUCCESS
     return 1;
 }
@@ -491,7 +491,7 @@ void Change_Password(SOCKET client, vector<User>& Database, User& user, bool enc
     {
         // Update Database
         int flag = Change_Info(Database, user, 1);
-
+        Upload_Database(Database);
         // Sent Flag CHANE_SUCCESSS to sever
         msg = FlagSend(5);
         int Result = SentMsg(client, msg);
@@ -505,6 +505,7 @@ void Change_Password(SOCKET client, vector<User>& Database, User& user, bool enc
 }
 
 void Check_User(SOCKET client, vector<User> Database, User user, string message) {   // FIx by D
+    Upload_Database(Database);
     string option, username;
     message = message.substr(strlen("CHECK_USER "));
     cout << message << endl;
@@ -576,6 +577,7 @@ void Check_User(SOCKET client, vector<User> Database, User user, string message)
     }
 }
 void Setup_Info(SOCKET client, vector<User>& Database, string message, User& user) {  // Fix By D
+    Upload_Database(Database);
     string option, information;
     message = message.substr(strlen("SETUP_INFO "));
     cout << message << endl;
