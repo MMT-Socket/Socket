@@ -231,6 +231,7 @@ int SentMsg(SOCKET client, string msg) {
     return 1;
 
 }
+
 string RevEncrytMsg(SOCKET client, bool encrypt) {
     if (encrypt == true)
     {
@@ -398,15 +399,40 @@ int Change_Info(vector<User>& Database, User user, int flag) {
 }
 void Login(SOCKET client, vector<User>& Database, User& user, bool& success, bool encrypt) {
 
+    //Rev En
+    char Encrypt[DEFAULT_BUFLEN] = "";
+    memset(Encrypt, 0, DEFAULT_BUFLEN);
+    int iResults = recv(client, Encrypt, DEFAULT_BUFLEN, 0);
+
+    //// Rev Account
+    char Account[DEFAULT_BUFLEN] = "";
+    memset(Account, 0, DEFAULT_BUFLEN);
+    iResults = recv(client, Account, DEFAULT_BUFLEN, 0);
+
+    //// Rev Password
+    char Password[DEFAULT_BUFLEN] = "";
+    memset(Password, 0, DEFAULT_BUFLEN);
+    iResults = recv(client, Password, DEFAULT_BUFLEN, 0);
+    
+    // IF have Encrypt
+    if (Encrypt[0] == 'Y')
+    {
+        user.Account = hex_to_string(Account);
+        user.Password = hex_to_string(Password);
+    }
+    else {
+
+        user.Account = Account;
+        user.Password = Password;
+    }
 
     string msg;
 
-    // Rev Account
-    user.Account = RevEncrytMsg(client, encrypt);
+    cout << "Acc" << endl;
     cout << user.Account << endl;
 
-    // Rev Password
-    user.Password = RevEncrytMsg(client, encrypt);
+
+    cout << "Pass" << endl;
     cout << user.Password << endl;
 
     // Get Flag to respond to sever
@@ -436,12 +462,38 @@ void Register(SOCKET client, vector<User>& Database, bool encrypt) {
     string msg;
     User user;
 
-    // Rev Account
-    user.Account = RevEncrytMsg(client, encrypt);
+    //Rev En
+    char Encrypt[DEFAULT_BUFLEN] = "";
+    memset(Encrypt, 0, DEFAULT_BUFLEN);
+    int iResults = recv(client, Encrypt, DEFAULT_BUFLEN, 0);
+
+    //// Rev Account
+    char Account[DEFAULT_BUFLEN] = "";
+    memset(Account, 0, DEFAULT_BUFLEN);
+    iResults = recv(client, Account, DEFAULT_BUFLEN, 0);
+
+    //// Rev Password
+    char Password[DEFAULT_BUFLEN] = "";
+    memset(Password, 0, DEFAULT_BUFLEN);
+    iResults = recv(client, Password, DEFAULT_BUFLEN, 0);
+
+    // IF have Encrypt
+    if (Encrypt[0] == 'Y')
+    {
+        user.Account = hex_to_string(Account);
+        user.Password = hex_to_string(Password);
+    }
+    else {
+
+        user.Account = Account;
+        user.Password = Password;
+    }
+    // show
+    cout << "Acc" << endl;
     cout << user.Account << endl;
 
-    // Rev Password
-    user.Password = RevEncrytMsg(client, encrypt);
+
+    cout << "Pass" << endl;
     cout << user.Password << endl;
 
     // Get Flag to respond to sever
@@ -474,17 +526,42 @@ void Register(SOCKET client, vector<User>& Database, bool encrypt) {
 void Change_Password(SOCKET client, vector<User>& Database, User& user, bool encrypt) {
 
     string msg;
+
     bool change = true;
-    // Rev current Password 
-    msg = RevEncrytMsg(client, encrypt);
-    if (msg != user.Password)
+    // Rev Encrpt  
+    cout << "En" << endl;
+    msg = RevEncrytMsg(client, false);
+
+
+    //// Rev Password
+    char Password[DEFAULT_BUFLEN] = "";
+    memset(Password, 0, DEFAULT_BUFLEN);
+    int iResults = recv(client, Password, DEFAULT_BUFLEN, 0);
+
+    if (msg == "Y")
     {
-        change = false;
+        encrypt = true;
+        msg = hex_to_string(Password);
+    }
+    else {
+        msg = Password;
     }
 
-    // Rev Password
+    //Rev current pass
+    while (msg != user.Password)
+    {
+        change = false;
+        msg = FlagSend(6);
+        int res = SentMsg(client, msg);
+        msg = RevEncrytMsg(client, encrypt);
+    }
+
+    // Rev Changed Password
     user.Password = RevEncrytMsg(client, encrypt);
+    cout << "Pass" << endl;
     cout << user.Password << endl;
+    change = true;
+
 
     // Update Database
     if (change == true)
@@ -804,7 +881,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
     std::string msg = "";
     bool Open = true;
     User user;
-    bool encrypt = true;
+    bool encrypt = false;
     cout << "Up_Load_Database" << endl;
     // Upload_Database 
     vector<User> Database;

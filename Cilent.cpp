@@ -29,6 +29,13 @@ struct client_type
     char received_message[DEFAULT_BUFLEN];
 };
 
+struct User {
+
+    string Account;
+    string Password;
+    string Encrypt;
+};
+
 struct coord
 {
     int y;
@@ -345,9 +352,16 @@ void Shutdown(SOCKET& client) {
     return;
 }
 
-void InputPassword(SOCKET& client, bool encrypt) {
+void InputPassword(SOCKET& client, bool encrypt , User& user,int purpose ) {
     string sent_message;
-    cout << setw(70) << "Input Password:" << endl;
+    if (purpose == 1)
+    {
+        cout << setw(70) << "Input Password:" << endl;
+    }
+    else {
+        cout << setw(69) << "Input new Password:" << endl;
+    }
+    
     cout << setw(56) << "=>>";
 
     /*char p[100];
@@ -385,10 +399,20 @@ void InputPassword(SOCKET& client, bool encrypt) {
     {
         sent_message[u] = buf[u];
     }
-    SentEncrytMsg(client, sent_message, encrypt);
-}
 
-void Login(SOCKET& client, bool encrypt) {
+    user.Password = sent_message;
+}
+void EncryptMenu() {
+
+    // Init user's Menu
+    cout << setw(70) << "====== Encrypt =====" << endl;
+    Clean(2);
+    cout << setw(75) << "Do you want to encrypt message (Y/N)" << endl;
+    Clean(2);
+    cout << setw(65) << "=>>  ";
+
+}
+void Login(SOCKET& client, bool encrypt,User& user) {
 
     Clean(1);
 
@@ -400,39 +424,73 @@ void Login(SOCKET& client, bool encrypt) {
     //  Input Account
     cout << setw(70) << "Input Account :" << endl;
     cout << setw(60) << "=>>  ";
-    getline(cin, sent_message);
-    SentEncrytMsg(client, sent_message, encrypt);
+    getline(cin, user.Account);
 
     //  Input Password
-    InputPassword(client, encrypt);
+    InputPassword(client, encrypt,user,1);
+
+    Clean(1);
+    
+    // Sent mess
+
+    EncryptMenu();
+    getline(cin, user.Encrypt);
+
+    if (user.Encrypt == "Y")
+    {
+        encrypt = true;
+    }
+
+    SentEncrytMsg(client, user.Encrypt, false);
+
+    SentEncrytMsg(client, user.Account, encrypt);
+
+    SentEncrytMsg(client, user.Password, encrypt);
 
 }
 
 void Register(SOCKET& client, bool encrypt) {
 
+    User user;
     Clean(1);
 
     string sent_message = FlagSend(2);
     // Send Flag REGISTER 
     SentEncrytMsg(client, sent_message, encrypt);
+    
     cout << setw(70) << "====REGISTER====" << endl;
 
     //  Input Account
     cout << setw(70) << "Input Account : " << endl;
     cout << setw(60) << "=>>  ";
-    getline(cin, sent_message);
-    SentEncrytMsg(client, sent_message, encrypt);
+    getline(cin, user.Account);
 
     //  Input Password
-    InputPassword(client, encrypt);
+    InputPassword(client, encrypt,user,1);
+
+    Clean(1);
+
+
+    EncryptMenu();
+    getline(cin, user.Encrypt);
+
+
+    if (user.Encrypt == "Y")
+    {
+        encrypt = true;
+    }
+    
+    // Sent mess
+    SentEncrytMsg(client, user.Encrypt, false);
+    SentEncrytMsg(client, user.Account, encrypt);
+    SentEncrytMsg(client, user.Password, encrypt);
 
 }
 
-void Change_Password(SOCKET& client, bool encrypt) {
+int Change_Password(SOCKET& client, bool& encrypt,User user, bool &firstTime) {
 
-    string sent_message = FlagSend(3);
-    // Send Flag CHANGE_PASSWORD
-    SentEncrytMsg(client, sent_message, encrypt);
+    string sent_message;
+
     cout << setw(70) << "====CHANGE_PASSWORD====" << endl;
 
     //  Input Current Password
@@ -467,12 +525,44 @@ void Change_Password(SOCKET& client, bool encrypt) {
     {
         sent_message[u] = buf[u];
     }
-    //
+    
+
+    ////  Input Password
+    //InputPassword(client, encrypt, user);
+
+    Clean(2);
+    if (firstTime == true)
+    {
+        // Encrypt
+        EncryptMenu();
+        getline(cin, user.Encrypt);
+        if (user.Encrypt == "Y")
+        {
+            encrypt = true;
+        }
+        SentEncrytMsg(client, user.Encrypt, false);       
+
+    }
     SentEncrytMsg(client, sent_message, encrypt);
 
-    cout << endl;
+
+
+    if (sent_message == user.Password)
+    {
+        return 1;
+    }
+    return 0;
+
+
+}
+void Correct_Password(SOCKET& client, bool encrypt, User &user) {
+
+
     //  Input Password
-    InputPassword(client, encrypt);
+    InputPassword(client, encrypt, user,2);
+    
+    SentEncrytMsg(client, user.Password, encrypt);
+  
 }
 
 void Check_User(SOCKET& client, bool encrypt) {
@@ -632,16 +722,6 @@ void OpenMenu() {
 
 }
 
-void EncryptMenu() {
-
-    // Init user's Menu
-    cout << setw(70) << "====== Encrypt =====" << endl;
-    Clean(2);
-    cout << setw(75) << "Do you want to encrypt message (Y/N)" << endl;
-    Clean(2);
-    cout << setw(65) << "=>>  ";
-
-}
 
 // GAME PLAY
 
@@ -890,7 +970,7 @@ int ReceviedMessage(client_type& new_client)
 {
     vector<string> user_online;
     bool Open = true;
-    bool encrypt = true;
+    bool encrypt = false;
     // Game play
     vector<vector<int>> Ships;
     vector<vector<int>> pos;
@@ -961,14 +1041,12 @@ int ReceviedMessage(client_type& new_client)
         break;
         case 6: // CHANGE_FAIL 
         {
-            Clean(1);
+            /*Clean(1);
 
             cout << setw(70) << "======CHANGE_FAIL======" << endl;
             cout << setw(70) << "CURRENT_PASSWORD_WRONG " << endl;
 
-            Clean(2);
-
-            OpenMenu();
+            Clean(2);*/
         }
         break;
         case 7: // CHECK USER
@@ -1284,22 +1362,10 @@ void Running() {
     thread my_thread(&ReceviedMessage, ref(client));
     bool Open = true;
     bool wating_send_map = true;
-
+    bool encrypt = false;
     int P2_ID = -1;
-    EncryptMenu();
-    bool encrypt = true;
-    getline(cin, sent_message);
-    if (sent_message == "Y")
-    {
-        sent_message = "ENCRYPT_" + sent_message;
-        SentEncrytMsg(client.socket, sent_message, encrypt);
-        encrypt = true;
-    }
-    else {
-        sent_message = "ENCRYPT_" + sent_message;
-        SentEncrytMsg(client.socket, sent_message, encrypt);
-        encrypt = false;
-    }
+    User user;
+    
     // Show Login and Register menu
     Login_Register_Menu();
     while (1) {
@@ -1331,7 +1397,7 @@ void Running() {
         case 1: // LOGIN
         {
 
-            Login(client.socket, encrypt);
+            Login(client.socket, encrypt,user);
             break;
         }
         case 2: // REGISTER
@@ -1342,7 +1408,30 @@ void Running() {
         case 3: // CHANGE_PASSWORD
         {
             Clean(1);
-            Change_Password(client.socket, encrypt);
+            string sent_message = FlagSend(3);
+            // Send Flag CHANGE_PASSWORD
+            SentEncrytMsg(client.socket, sent_message, encrypt);
+
+            bool firstTime = true;
+            int res = 0;
+            while (res == 0)
+            {
+                res = Change_Password(client.socket, encrypt, user, firstTime);
+                firstTime = false;
+                if (res == 1)
+                {
+                    Clean(2);
+                }
+                else {
+                    Clean(1);
+                    cout << setw(70) << "======CHANGE_FAIL======" << endl;
+                    cout << setw(70) << "CURRENT_PASSWORD_WRONG " << endl;
+                    Clean(2);
+                }
+            }
+            Clean(1);
+            Correct_Password(client.socket, encrypt, user);
+            encrypt = false;
             break;
         }
         case 4: // CHECK USER                                         MADE BY D
