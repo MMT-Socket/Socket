@@ -125,6 +125,8 @@ string FlagSend(int flag) {
     // Sign and user's info part
     switch (flag)
     {
+    case 0:
+        return "USER_FAIL_ONLINE";
     case 1:
         return "LOGIN_SUCCESS";
     case 2:
@@ -137,7 +139,7 @@ string FlagSend(int flag) {
         return "CHANGE_SUCCESS";
     case 6:
         return "CHANGE_FAIL";
-
+    
         // Game part
     case 7:
         return "ENOUGH_USER";
@@ -352,7 +354,17 @@ int Verify_Login(vector<User> Database, User user, bool flag) {
     //RIGISTER_SUCCESS
     return 3;
 }
+int Verify_Online(vector<User> Online, User user) {
 
+    for (int i = 0; i < Online.size(); i++)
+    {
+        if (Online[i].Account == user.Account )
+        {
+            return 0;
+        } 
+    }
+    return 1;
+};
 int Change_Info(vector<User>& Database, User user, int flag) {
 
     Upload_Database(Database);
@@ -397,7 +409,7 @@ int Change_Info(vector<User>& Database, User user, int flag) {
     //RIGISTER_SUCCESS
     return 1;
 }
-void Login(SOCKET client, vector<User>& Database, User& user, bool& success, bool encrypt) {
+void Login(SOCKET client, vector<User>& Database, vector<User> Online, User& user, bool& success, bool encrypt) {
 
     //Rev En
     char Encrypt[DEFAULT_BUFLEN] = "";
@@ -437,7 +449,10 @@ void Login(SOCKET client, vector<User>& Database, User& user, bool& success, boo
 
     // Get Flag to respond to sever
     int flag = Verify_Login(Database, user, true);
-
+    if (flag == 1 && Verify_Online(Online,user) == 0)
+    {
+        flag = 3;
+    }
     switch (flag)
     {
     case 1: // msg = "LOGIN_SUCCESS"
@@ -450,6 +465,13 @@ void Login(SOCKET client, vector<User>& Database, User& user, bool& success, boo
     case 2: // msg = "LOGIN_FAIL"
     {
         msg = FlagSend(flag);
+        int Result = SentMsg(client, msg);
+        success = false;
+    }
+    break;
+    case 3: // msg = "USER_FAIL_ONLINE"
+    {
+        msg = FlagSend(0);
         int Result = SentMsg(client, msg);
         success = false;
     }
@@ -914,8 +936,10 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
         case 1: //Login
         {
             Upload_Database(Database);
+            Collect_Online_List(UserOnline);
+
             bool success = true;
-            Login(new_client.socket, Database, user, success, encrypt);
+            Login(new_client.socket, Database, UserOnline, user, success, encrypt);
 
             if (success)
             {
