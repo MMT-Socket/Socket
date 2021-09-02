@@ -128,6 +128,9 @@ int FlagRev(string s) {
     else if (s.find("SETUP_INFO") != -1) {
         return 10;
     }
+    else if (s.find("USER_FAIL_ONLINE") != -1) {
+        return 11;
+    }
     else if (s == "LOGOUT")
     {
         return 100;
@@ -1106,6 +1109,15 @@ int ReceviedMessage(client_type& new_client)
             cout << setw(70) << "======SETUP_INFO_SUCCESS======" << endl;
             cout << endl << endl << endl;
             cout << msg << endl;
+            OpenMenu();
+
+        }
+        break;
+        case 11:
+        {
+            Clean(1);
+            cout << setw(70) << "===USER_FAIL_ONLINE===" << endl;
+            Clean(2);
             OpenMenu();
 
         }
