@@ -444,11 +444,11 @@ void Login(SOCKET& client, bool encrypt,User& user) {
         encrypt = true;
     }
 
+    // Sent mess
     SentEncrytMsg(client, user.Encrypt, false);
-
-    SentEncrytMsg(client, user.Account, encrypt);
-
-    SentEncrytMsg(client, user.Password, encrypt);
+    string s;
+    s = to_string(user.Account.length()) + user.Account + user.Password;
+    SentEncrytMsg(client, s, encrypt);
 
 }
 
@@ -485,8 +485,12 @@ void Register(SOCKET& client, bool encrypt) {
     
     // Sent mess
     SentEncrytMsg(client, user.Encrypt, false);
-    SentEncrytMsg(client, user.Account, encrypt);
-    SentEncrytMsg(client, user.Password, encrypt);
+    string s;
+    s = to_string(user.Account.length()) + user.Account + user.Password;
+    SentEncrytMsg(client, s, encrypt);
+    
+    /*SentEncrytMsg(client, user.Account, encrypt);
+    SentEncrytMsg(client, user.Password, encrypt);*/
 
 }
 

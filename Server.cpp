@@ -411,34 +411,92 @@ int Change_Info(vector<User>& Database, User user, int flag) {
 }
 void Login(SOCKET client, vector<User>& Database, vector<User> Online, User& user, bool& success, bool encrypt) {
 
+	////Rev En
+	//char Encrypt[DEFAULT_BUFLEN] = "";
+	//memset(Encrypt, 0, DEFAULT_BUFLEN);
+	//int iResults = recv(client, Encrypt, DEFAULT_BUFLEN, 0);
+
+	////// Rev Account
+	//char Account[DEFAULT_BUFLEN] = "";
+	//memset(Account, 0, DEFAULT_BUFLEN);
+	//iResults = recv(client, Account, DEFAULT_BUFLEN, 0);
+
+	////// Rev Password
+	//char Password[DEFAULT_BUFLEN] = "";
+	//memset(Password, 0, DEFAULT_BUFLEN);
+	//iResults = recv(client, Password, DEFAULT_BUFLEN, 0);
+
+	//// IF have Encrypt
+	//if (Encrypt[0] == 'Y')
+	//{
+	//	user.Account = hex_to_string(Account);
+	//	user.Password = hex_to_string(Password);
+	//}
+	//else {
+
+	//	user.Account = Account;
+	//	user.Password = Password;
+	//}
+	string msg;
+
 	//Rev En
 	char Encrypt[DEFAULT_BUFLEN] = "";
 	memset(Encrypt, 0, DEFAULT_BUFLEN);
 	int iResults = recv(client, Encrypt, DEFAULT_BUFLEN, 0);
+	cout << "En" << endl;
+	cout << Encrypt << endl;
 
 	//// Rev Account
 	char Account[DEFAULT_BUFLEN] = "";
 	memset(Account, 0, DEFAULT_BUFLEN);
 	iResults = recv(client, Account, DEFAULT_BUFLEN, 0);
+	cout << "size + Account + mk" << endl;
+	cout << Account << endl;
 
-	//// Rev Password
-	char Password[DEFAULT_BUFLEN] = "";
-	memset(Password, 0, DEFAULT_BUFLEN);
-	iResults = recv(client, Password, DEFAULT_BUFLEN, 0);
-
+	string s;
 	// IF have Encrypt
 	if (Encrypt[0] == 'Y')
 	{
-		user.Account = hex_to_string(Account);
-		user.Password = hex_to_string(Password);
+		s = hex_to_string(Account);
+		string u;
+		u = s[0];
+		int size_acc = stoi(u);
+		cout << "length" << endl;
+		cout << size_acc << endl;
+		s = s.erase(0, 1);
+		for (int i = 0; i < size_acc; i++)
+		{
+			user.Account.resize(i + 1);
+			user.Account[i] = s[i];
+		}
+
+		s = s.erase(0, size_acc);
+
+		user.Password = s;
+		/*user.Password = hex_to_string(Password);*/
+
 	}
 	else {
+		s = Account;
+		string u;
+		u = s[0];
 
-		user.Account = Account;
-		user.Password = Password;
+		int size_acc = stoi(u);
+		cout << "length" << endl;
+		cout << size_acc << endl;
+		s = s.erase(0, 1);
+		for (int i = 0; i < size_acc; i++)
+		{
+			user.Account.resize(i + 1);
+			user.Account[i] = s[i];
+		}
+
+		s = s.erase(0, size_acc);
+
+		user.Password = s;
+		/*user.Password = hex_to_string(Password);*/
 	}
-
-	string msg;
+	//show
 
 	cout << "Acc" << endl;
 	cout << user.Account << endl;
@@ -488,27 +546,58 @@ void Register(SOCKET client, vector<User>& Database, bool encrypt) {
 	char Encrypt[DEFAULT_BUFLEN] = "";
 	memset(Encrypt, 0, DEFAULT_BUFLEN);
 	int iResults = recv(client, Encrypt, DEFAULT_BUFLEN, 0);
+	cout << "En" << endl;
+	cout << Encrypt << endl;
 
 	//// Rev Account
 	char Account[DEFAULT_BUFLEN] = "";
 	memset(Account, 0, DEFAULT_BUFLEN);
 	iResults = recv(client, Account, DEFAULT_BUFLEN, 0);
+	cout << "size + Account + mk" << endl;
+	cout << Account << endl;
 
-	//// Rev Password
-	char Password[DEFAULT_BUFLEN] = "";
-	memset(Password, 0, DEFAULT_BUFLEN);
-	iResults = recv(client, Password, DEFAULT_BUFLEN, 0);
-
+	string s;
 	// IF have Encrypt
 	if (Encrypt[0] == 'Y')
 	{
-		user.Account = hex_to_string(Account);
-		user.Password = hex_to_string(Password);
+		s = hex_to_string(Account);
+		string u;
+		u = s[0];
+		int size_acc = stoi(u);
+		cout << "length" << endl;
+		cout << size_acc << endl;
+		s = s.erase(0, 1);
+		for (int i = 0; i < size_acc; i++)
+		{
+			user.Account.resize(i + 1);
+			user.Account[i] = s[i];
+		}
+
+		s = s.erase(0, size_acc);
+
+		user.Password = s;
+		/*user.Password = hex_to_string(Password);*/
+
 	}
 	else {
+		s = Account;
+		string u;
+		u = s[0];
+		
+		int size_acc = stoi(u);
+		cout << "length" << endl;
+		cout << size_acc<<endl;
+		s = s.erase(0, 1);
+		for (int i = 0; i < size_acc; i++)
+		{
+			user.Account.resize(i + 1);
+			user.Account[i] = s[i];
+		}
 
-		user.Account = Account;
-		user.Password = Password;
+		s = s.erase(0, size_acc);
+
+		user.Password = s;
+		/*user.Password = hex_to_string(Password);*/
 	}
 	// show
 	cout << "Acc" << endl;
