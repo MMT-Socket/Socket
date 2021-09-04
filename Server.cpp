@@ -671,7 +671,7 @@ void Change_Password(SOCKET client, vector<User>& Database, User& user, bool enc
 	}
 }
 
-void Check_User(SOCKET client, vector<User> Database, User user, string message) {
+void Check_User(SOCKET client, vector<User> Database, User user, string message,vector<User> UserOnline) {
 	string option, username;
 	message = message.substr(strlen("CHECK_USER "));
 	/*cout << message << endl;*/
@@ -705,12 +705,17 @@ void Check_User(SOCKET client, vector<User> Database, User user, string message)
 			}
 		}
 		else if (option.find("online") != -1) {
-			if (Database[pos].online == 1) {
-				int results = SentMsg(client, "CHECK_USER online");
+			for (int i = 0; i < UserOnline.size(); i++)
+			{
+				if (username == UserOnline[i].Account) {
+					int results = SentMsg(client, "CHECK_USER online");
+				}
+				return;
+				
 			}
-			else {
-				int results = SentMsg(client, "CHECK_USER offline");
-			}
+			
+			int results = SentMsg(client, "CHECK_USER offline");
+			
 		}
 		else if (option.find("show_date") != -1) {
 			sendmsg = "CHECK_USER show_date " + Database[pos].Date;
@@ -1010,10 +1015,6 @@ void ServerShow(vector<User> Database, vector<User>& User_Online) {
 
 		cout << setw(10) << i + 1 << ": <" << Database[i].Account << "> // ";
 
-		if (User_Online[i].Account == "") cout << "None";
-		else cout << User_Online[i].Account;
-		cout << " // ";
-
 		cout << User_Online[i].Online_ID;
 		cout << " // ";
 
@@ -1114,7 +1115,8 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 		}
 		case 4: {   // Fix By D
 			Upload_Database(Database);
-			Check_User(new_client.socket, Database, user, msg);
+			Collect_Online_List(UserOnline);
+			Check_User(new_client.socket, Database, user, msg, UserOnline);
 			break;
 		}
 		case 5: {   // Fix By D
