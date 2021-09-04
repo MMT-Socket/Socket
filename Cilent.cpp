@@ -1235,6 +1235,7 @@ int ReceviedMessage(client_type& new_client)
             // When P1 win the game
             if (shipcount <= 10)
             {
+                shipcount = 12;
                 Clean(1);
                 msg = "LOSE_GAME";
                 SentEncrytMsg(new_client.socket, msg, encrypt);
@@ -1254,7 +1255,7 @@ int ReceviedMessage(client_type& new_client)
         case 30: // P2 LOSE_GAME
         {
 
-
+            shipcount = 12;
             Clean(2);
             Clean(1);
             /*msg = "LOSE_GAME";
