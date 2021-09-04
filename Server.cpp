@@ -950,8 +950,16 @@ void Rev_Responding_to_user_is_choosen(SOCKET client, string msg, vector<client_
 	int RES = SentMsg(client_array[P2_ID].socket, msg);
 }
 
-void Update_Map_Status(vector<User>& User_Online, int P1_ID) {
-	User_Online[P1_ID].Map_Status = 1;
+void Update_Map_Status(vector<User>& User_Online, int P1_ID,bool nextRound) {
+	if (nextRound == 1)
+	{
+		User_Online[P1_ID].Map_Status = 0;
+	}
+	else {
+
+		User_Online[P1_ID].Map_Status = 1;
+	}
+
 
 	ofstream out(USER_ONLINE, ios::out);
 
@@ -1152,7 +1160,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 		case 22: // P2 accept P1
 		{
 			// CREATE CONNECTION BETWEEN P1 AND P2
-			/*cout << "P1 Accesss P2" << endl;*/
+			cout << "P1 Accesss P2" << endl;
 
 			Get_P2_ID(msg, P2_ID, "ACCEPT,P");
 			msg = "COMPERTITOR_ACCEPT";
@@ -1176,15 +1184,15 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 			// FLAG + filename.txt
 			// Update P1 has Sent the Map
 			Collect_Online_List(UserOnline);
-			Update_Map_Status(UserOnline, P1_ID);
+			Update_Map_Status(UserOnline, P1_ID,false);
 
 			if (UserOnline[P1_ID].Map_Status == UserOnline[P2_ID].Map_Status)
 			{
-				// Flag 25: Send Map and start game : UPLOAD_MAP
+				/* Flag 25: Send Map and start game : UPLOAD_MAP*/
 
 				// FLAG + filename.txt
 
-				/*cout << "Send Map and start game" << endl;*/
+				cout << "Send Map and start game" << endl;
 
 				int Result = SentMsg(client_array[P2_ID].socket, msg);
 			}
@@ -1198,7 +1206,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 
 				msg = flag_send + msg;
 
-				/*cout << "Send Map and want P2 take back Map" << endl;*/
+				cout << "Send Map and want P2 take back Map" << endl;
 
 				int Result = SentMsg(client_array[P2_ID].socket, msg);
 
@@ -1210,22 +1218,22 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 		{
 			// Sent P1 Attack back to P1 client
 			int Result = SentMsg(client_array[P1_ID].socket, msg);
-			/*cout << "Sent P1 Attack back to P1 client" << endl;*/
+			cout << "Sent P1 Attack back to P1 client" << endl;
 			// Notify to P2's turn
 			msg = FLag_Game_Sent(7);
 			Result = SentMsg(client_array[P2_ID].socket, msg);
-			/*cout << "Notify to P2's turn" << endl;*/
+			cout << "Notify to P2's turn" << endl;
 
 			break;
 		}
 		case 27: // START_GAME _ PLAY_MORE
 		{
 
-
-			/*cout << "Prepare Userlist again" << endl;*/
+			
+			cout << "Prepare Userlist again" << endl;
 			Collect_Online_List(UserOnline);
 
-			/*cout << "Starting send messs" << endl;*/
+			cout << "Starting send messs" << endl;
 			Send_Online_User(new_client.socket, UserOnline);
 
 			break;
@@ -1241,6 +1249,8 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 			else {
 				num = stoi(Database[P1_ID].Point);
 			}
+			Update_Map_Status(UserOnline, P1_ID, true);
+			Update_Map_Status(UserOnline, P2_ID, true);
 
 			Database[P1_ID].Point = to_string(num + 1);
 			//Update point to database
@@ -1298,7 +1308,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 			break;
 		}
 		}
-		ServerShow(Database, UserOnline);
+		/*ServerShow(Database, UserOnline);*/
 
 	} //end while
 
