@@ -981,6 +981,54 @@ void Get_P2_ID(string msg, int& P2_ID, string flag) {
 	P2_ID = stoi(msg);
 }
 
+void ServerShow(vector<User> Database, vector<User>& User_Online) {
+	system("cls");
+	for (int i = 0; i < 4; i++)
+	{
+		cout << endl;
+	}
+	cout << setw(20) << "=====DATABASE====" << endl << endl;
+	cout << setw(38) << "<Name> // Fullname // Note // Point" << endl;
+	for (int i = 0; i < Database.size(); i++)
+	{
+		cout << setw(10) << i + 1 << ": <" << Database[i].Account << "> // ";
+
+		if (Database[i].Fullname == "") cout << "None";
+		else cout << Database[i].Fullname;
+		cout << " // ";
+
+		if (Database[i].Note == "") cout << "None";
+		else cout << Database[i].Note;
+		cout << " // ";
+
+		if (Database[i].Point == "") cout << "None";
+		else cout << Database[i].Point;
+
+		cout << endl;
+	}
+	cout << endl;
+	cout << setw(20) << "===USER_ONLINE===" << endl << endl;
+	cout << setw(31) << "<Name> // Online_ID // Point" << endl;
+	for (int i = 0; i < User_Online.size(); i++)
+	{
+
+		cout << setw(10) << i + 1 << ": <" << Database[i].Account << "> // ";
+
+		if (User_Online[i].Account == "") cout << "None";
+		else cout << User_Online[i].Account;
+		cout << " // ";
+
+		cout << User_Online[i].Online_ID;
+		cout << " // ";
+
+		if (Database[i].Point == "") cout << "None";
+		else cout << Database[i].Point;
+
+		cout << endl;
+	}
+	cout << endl;
+	cout << "======================================================" << endl;
+}
 void ShutdownClient(SOCKET& client, vector<client_type>& client_array, int id) {
 
 	// Send Flag LOG
@@ -1005,11 +1053,11 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 	vector<User> Database;
 	vector<User> UserOnline;
 	Upload_Database(Database);
-
+	Collect_Online_List(UserOnline);
 	// Game Part
 	int P1_ID = new_client.id;
 	int P2_ID = -1;
-
+	ServerShow(Database, UserOnline);
 	//Session 
 	cout << "client ID" << new_client.id << endl;
 	while (1)
@@ -1248,6 +1296,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 			break;
 		}
 		}
+		ServerShow(Database, UserOnline);
 
 	} //end while
 
