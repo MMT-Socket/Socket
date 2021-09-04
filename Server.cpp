@@ -375,13 +375,16 @@ int Change_Info(vector<User>& Database, User user, int flag) {
 	case 1: // CHANGE_PASSWORD
 	{
 		int i = 0;
-		while (i < Database.size() - 1)
+		while (i < Database.size())
 		{
 			if (user.Account == Database[i].Account)
 			{
 
 				Database[i].Password = user.Password;
+				cout << "Da doi " << endl;
+				cout << Database[i].Password << endl;
 			}
+
 			i++;
 		}
 		break;
@@ -404,39 +407,23 @@ int Change_Info(vector<User>& Database, User user, int flag) {
 	}
 
 	}
+	for (int i = 0; i < Database.size(); i++)
+	{
+		cout << Database[i].Account << "/" << Database[i].Password << endl;
+	}
 	Write_User_Info_To_Database(Database);
+	cout << "da viet lai " << endl;
+	for (int i = 0; i < Database.size(); i++)
+	{
+		cout << Database[i].Account << "/" << Database[i].Password << endl;
+	}
 	Upload_Database(Database);
 	//RIGISTER_SUCCESS
 	return 1;
 }
 void Login(SOCKET client, vector<User>& Database, vector<User> Online, User& user, bool& success, bool encrypt) {
 
-	////Rev En
-	//char Encrypt[DEFAULT_BUFLEN] = "";
-	//memset(Encrypt, 0, DEFAULT_BUFLEN);
-	//int iResults = recv(client, Encrypt, DEFAULT_BUFLEN, 0);
 
-	////// Rev Account
-	//char Account[DEFAULT_BUFLEN] = "";
-	//memset(Account, 0, DEFAULT_BUFLEN);
-	//iResults = recv(client, Account, DEFAULT_BUFLEN, 0);
-
-	////// Rev Password
-	//char Password[DEFAULT_BUFLEN] = "";
-	//memset(Password, 0, DEFAULT_BUFLEN);
-	//iResults = recv(client, Password, DEFAULT_BUFLEN, 0);
-
-	//// IF have Encrypt
-	//if (Encrypt[0] == 'Y')
-	//{
-	//	user.Account = hex_to_string(Account);
-	//	user.Password = hex_to_string(Password);
-	//}
-	//else {
-
-	//	user.Account = Account;
-	//	user.Password = Password;
-	//}
 	string msg;
 
 	//Rev En
@@ -473,7 +460,6 @@ void Login(SOCKET client, vector<User>& Database, vector<User> Online, User& use
 		s = s.erase(0, size_acc);
 
 		user.Password = s;
-		/*user.Password = hex_to_string(Password);*/
 
 	}
 	else {
@@ -517,7 +503,7 @@ void Login(SOCKET client, vector<User>& Database, vector<User> Online, User& use
 	{
 		msg = FlagSend(flag);
 		int Result = SentMsg(client, msg);
-
+		success = true;
 	}
 	break;
 	case 2: // msg = "LOGIN_FAIL"
@@ -583,10 +569,10 @@ void Register(SOCKET client, vector<User>& Database, bool encrypt) {
 		s = Account;
 		string u;
 		u = s[0];
-		
+
 		int size_acc = stoi(u);
 		cout << "length" << endl;
-		cout << size_acc<<endl;
+		cout << size_acc << endl;
 		s = s.erase(0, 1);
 		for (int i = 0; i < size_acc; i++)
 		{
@@ -692,8 +678,7 @@ void Change_Password(SOCKET client, vector<User>& Database, User& user, bool enc
 	}
 }
 
-void Check_User(SOCKET client, vector<User> Database, User user, string message) {   // FIx by D
-	Upload_Database(Database);
+void Check_User(SOCKET client, vector<User> Database, User user, string message) {
 	string option, username;
 	message = message.substr(strlen("CHECK_USER "));
 	cout << message << endl;
@@ -765,7 +750,6 @@ void Check_User(SOCKET client, vector<User> Database, User user, string message)
 	}
 }
 void Setup_Info(SOCKET client, vector<User>& Database, string message, User& user) {  // Fix By D
-	Upload_Database(Database);
 	string option, information;
 	message = message.substr(strlen("SETUP_INFO "));
 	cout << message << endl;
@@ -793,6 +777,19 @@ void Setup_Info(SOCKET client, vector<User>& Database, string message, User& use
 	Change_Info(Database, user, 2);
 }
 
+void Point(SOCKET client, vector<User>& Database, string message, User& user) {
+	string point;
+	point = message.substr(strlen("POINT "));
+	cout << message << endl;
+	string sendmsg;
+	for (int i = 0; i < Database.size(); ++i) {
+		if (Database[i].Account == user.Account) {
+			Database[i].Point = point;
+		}
+	}
+	Change_Info(Database, user, 2);
+}
+
 // ONLINE USER PART
 // Write online user to file to manager
 void Add_User_Online_File(vector<User>& User_Online, User user, int id) {
@@ -804,10 +801,14 @@ void Add_User_Online_File(vector<User>& User_Online, User user, int id) {
 	if (out.is_open())
 	{
 		/*out._Seekbeg();*/
-		// Format file USER_ONLINE.txt : Username-ONLINE_ID
+		// Format file USER_ONLINE.txt : Username/ONLINE_ID/Map
 		for (int i = 0; i < User_Online.size(); i++)
 		{
-			if (i == User_Online.size() - 1)
+			/*if (i == User_Online.size() - 1)
+			{
+				User_Online[i].Online_ID = id;
+			}*/
+			if (User_Online[i].Account == user.Account)      //Fix
 			{
 				User_Online[i].Online_ID = id;
 			}
@@ -864,7 +865,6 @@ void Collect_Online_List(vector<User>& User_Online) {
 	string s;
 	User user;
 	vector<User> tmp;
-
 	ifstream in(USER_ONLINE, ios::in);
 
 	while (in.is_open() && !in.eof())
@@ -884,11 +884,18 @@ void Collect_Online_List(vector<User>& User_Online) {
 
 		getline(in, s);
 		user.Map_Status = stoi(s);
-		tmp.push_back(user);
 
+
+		/*for (int i = 0; i < User_Online.size(); ++i) {
+			if (User_Online[i].Account == user.Account) {
+				User_Online[i].Online_ID = user.Online_ID;
+				User_Online[i].Map_Status = user.Map_Status;
+			}
+		}*/
+		tmp.push_back(user);
 	}
-	in.close();
 	User_Online = tmp;
+	in.close();
 
 }
 
@@ -1037,7 +1044,12 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 
 				cout << "Add new ogin user" << endl;
 				Add_User_Online_File(UserOnline, user, new_client.id);
-
+				//	for (int i = 0; i < UserOnline.size(); i++)
+				//	{
+				//		cout << "User online now" << endl;
+				//		cout << UserOnline[i].Account << "/" << UserOnline[i].Password << endl;
+				//	}
+				//}
 			}
 			break;
 		}
@@ -1048,9 +1060,11 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 			break;
 		}
 		case 3: // CHANGE_PASSWORD
+		{
 			Upload_Database(Database);
 			Change_Password(new_client.socket, Database, user, encrypt);
 			break;
+		}
 		case 4: {   // Fix By D
 
 			Check_User(new_client.socket, Database, user, msg);
@@ -1059,6 +1073,11 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 		case 5: {   // Fix By D
 
 			Setup_Info(new_client.socket, Database, msg, user);
+			break;
+		}
+		case 6: {
+			// FIX
+			Point(new_client.socket, Database, msg, user);
 			break;
 		}
 		case 20: // START_GAME
@@ -1236,8 +1255,8 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 	return 0;
 }
 
-
 void Run() {
+
 	WSADATA wsaData;
 	struct addrinfo hints;
 	struct addrinfo* server = NULL;
@@ -1347,6 +1366,7 @@ void Run() {
 
 	system("pause");
 }
+
 int main()
 {
 	Run();

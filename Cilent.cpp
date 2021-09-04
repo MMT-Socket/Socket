@@ -1069,19 +1069,23 @@ int ReceviedMessage(client_type& new_client)
             }
             else if (msg.find("show_fullname") != -1) {
                 msg = msg.substr(strlen("CHECK_USER show_fullname "));
-                cout << msg << endl;
+                cout << "Fullname: " << msg << endl;
             }
             else if (msg.find("show_date") != -1) {
                 msg = msg.substr(strlen("CHECK_USER show_date "));
-                cout << msg << endl;
+                cout << "Date: " << msg << endl;
             }
             else if (msg.find("show_note") != -1) {
                 msg = msg.substr(strlen("CHECK_USER show_note "));
-                cout << msg << endl;
+                cout << "Note: " << msg << endl;
+            }
+            else if (msg.find("show_point") != -1) {
+                msg = msg.substr(strlen("CHECK_USER show_point "));
+                cout << "Point: " << msg << endl;
             }
             else if (msg.find("show_all") != -1) {
                 msg = msg.substr(strlen("CHECK_USER show_all "));
-                cout << msg << endl;
+                cout << "All: " << msg << endl;
             }
             else {
                 cout << setw(70) << "======ACCOUNT_IS_EXIST======" << endl;
@@ -1122,7 +1126,7 @@ int ReceviedMessage(client_type& new_client)
             Clean(1);
             cout << setw(70) << "===USER_FAIL_ONLINE===" << endl;
             Clean(2);
-            OpenMenu();
+            Login_Register_Menu();
 
         }
         break;
