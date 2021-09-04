@@ -709,8 +709,9 @@ void Check_User(SOCKET client, vector<User> Database, User user, string message,
 			{
 				if (username == UserOnline[i].Account) {
 					int results = SentMsg(client, "CHECK_USER online");
+					cout << "Got it" << endl;
+					return;
 				}
-				return;
 				
 			}
 			
@@ -1100,12 +1101,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 
 				/*cout << "Add new ogin user" << endl;*/
 				Add_User_Online_File(UserOnline, user, new_client.id);
-				//	for (int i = 0; i < UserOnline.size(); i++)
-				//	{
-				//		cout << "User online now" << endl;
-				//		cout << UserOnline[i].Account << "/" << UserOnline[i].Password << endl;
-				//	}
-				//}
+			
 			}
 			break;
 		}
@@ -1160,7 +1156,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 		case 22: // P2 accept P1
 		{
 			// CREATE CONNECTION BETWEEN P1 AND P2
-			cout << "P1 Accesss P2" << endl;
+			/*cout << "P1 Accesss P2" << endl;*/
 
 			Get_P2_ID(msg, P2_ID, "ACCEPT,P");
 			msg = "COMPERTITOR_ACCEPT";
@@ -1192,7 +1188,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 
 				// FLAG + filename.txt
 
-				cout << "Send Map and start game" << endl;
+				/*cout << "Send Map and start game" << endl;*/
 
 				int Result = SentMsg(client_array[P2_ID].socket, msg);
 			}
@@ -1218,11 +1214,11 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 		{
 			// Sent P1 Attack back to P1 client
 			int Result = SentMsg(client_array[P1_ID].socket, msg);
-			cout << "Sent P1 Attack back to P1 client" << endl;
+			/*cout << "Sent P1 Attack back to P1 client" << endl;*/
 			// Notify to P2's turn
 			msg = FLag_Game_Sent(7);
 			Result = SentMsg(client_array[P2_ID].socket, msg);
-			cout << "Notify to P2's turn" << endl;
+			/*cout << "Notify to P2's turn" << endl;*/
 
 			break;
 		}
@@ -1230,10 +1226,10 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 		{
 
 			
-			cout << "Prepare Userlist again" << endl;
+			/*cout << "Prepare Userlist again" << endl;*/
 			Collect_Online_List(UserOnline);
 
-			cout << "Starting send messs" << endl;
+			/*cout << "Starting send messs" << endl;*/
 			Send_Online_User(new_client.socket, UserOnline);
 
 			break;
@@ -1308,7 +1304,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 			break;
 		}
 		}
-		/*ServerShow(Database, UserOnline);*/
+		ServerShow(Database, UserOnline);
 
 	} //end while
 
