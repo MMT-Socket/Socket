@@ -240,20 +240,20 @@ string RevEncrytMsg(SOCKET client, bool encrypt) {
 		char tempmsg[DEFAULT_BUFLEN] = "";
 		memset(tempmsg, 0, DEFAULT_BUFLEN);
 		int iResults = recv(client, tempmsg, DEFAULT_BUFLEN, 0);
-		cout << endl;
+		/*cout << endl;
 		cout << "===" << endl;
 		cout << tempmsg << endl;
-		cout << "===" << endl;
+		cout << "===" << endl;*/
 		return hex_to_string(tempmsg);
 	}
 	else {
 		char tempmsg[DEFAULT_BUFLEN] = "";
 		memset(tempmsg, 0, DEFAULT_BUFLEN);
 		int iResults = recv(client, tempmsg, DEFAULT_BUFLEN, 0);
-		cout << endl;
+		/*cout << endl;
 		cout << "===" << endl;
 		cout << tempmsg << endl;
-		cout << "===" << endl;
+		cout << "===" << endl;*/
 		return tempmsg;
 	}
 
@@ -268,7 +268,7 @@ void Write_User_Info_To_Database(vector<User> Database) {
 		for (int i = 0; i < Database.size(); i++)
 		{
 			out << Database[i].Account << "-" << Database[i].Password << "-" << Database[i].Fullname << "-" << Database[i].Date << "-" << Database[i].Point << "-" << Database[i].Note;
-			cout << Database[i].Account << "-" << Database[i].Password << "-" << Database[i].Fullname << "-" << Database[i].Date << "-" << Database[i].Point << "-" << Database[i].Note << "." << endl;
+			/*cout << Database[i].Account << "-" << Database[i].Password << "-" << Database[i].Fullname << "-" << Database[i].Date << "-" << Database[i].Point << "-" << Database[i].Note << "." << endl;*/
 			if (i != Database.size() - 1)
 			{
 				out << endl;
@@ -381,8 +381,8 @@ int Change_Info(vector<User>& Database, User user, int flag) {
 			{
 
 				Database[i].Password = user.Password;
-				cout << "Da doi " << endl;
-				cout << Database[i].Password << endl;
+				/*cout << "Da doi " << endl;
+				cout << Database[i].Password << endl;*/
 			}
 
 			i++;
@@ -409,13 +409,13 @@ int Change_Info(vector<User>& Database, User user, int flag) {
 	}
 	for (int i = 0; i < Database.size(); i++)
 	{
-		cout << Database[i].Account << "/" << Database[i].Password << endl;
+		/*cout << Database[i].Account << "/" << Database[i].Password << endl;*/
 	}
 	Write_User_Info_To_Database(Database);
-	cout << "da viet lai " << endl;
+	/*cout << "da viet lai " << endl;*/
 	for (int i = 0; i < Database.size(); i++)
 	{
-		cout << Database[i].Account << "/" << Database[i].Password << endl;
+		/*cout << Database[i].Account << "/" << Database[i].Password << endl;*/
 	}
 	Upload_Database(Database);
 	//RIGISTER_SUCCESS
@@ -430,15 +430,15 @@ void Login(SOCKET client, vector<User>& Database, vector<User> Online, User& use
 	char Encrypt[DEFAULT_BUFLEN] = "";
 	memset(Encrypt, 0, DEFAULT_BUFLEN);
 	int iResults = recv(client, Encrypt, DEFAULT_BUFLEN, 0);
-	cout << "En" << endl;
-	cout << Encrypt << endl;
+	/*cout << "En" << endl;
+	cout << Encrypt << endl;*/
 
 	//// Rev Account
 	char Account[DEFAULT_BUFLEN] = "";
 	memset(Account, 0, DEFAULT_BUFLEN);
 	iResults = recv(client, Account, DEFAULT_BUFLEN, 0);
-	cout << "size + Account + mk" << endl;
-	cout << Account << endl;
+	/*cout << "size + Account + mk" << endl;
+	cout << Account << endl;*/
 
 	string s;
 	// IF have Encrypt
@@ -448,8 +448,8 @@ void Login(SOCKET client, vector<User>& Database, vector<User> Online, User& use
 		string u;
 		u = s[0];
 		int size_acc = stoi(u);
-		cout << "length" << endl;
-		cout << size_acc << endl;
+		/*cout << "length" << endl;
+		cout << size_acc << endl;*/
 		s = s.erase(0, 1);
 		for (int i = 0; i < size_acc; i++)
 		{
@@ -468,8 +468,8 @@ void Login(SOCKET client, vector<User>& Database, vector<User> Online, User& use
 		u = s[0];
 
 		int size_acc = stoi(u);
-		cout << "length" << endl;
-		cout << size_acc << endl;
+		/*cout << "length" << endl;
+		cout << size_acc << endl;*/
 		s = s.erase(0, 1);
 		for (int i = 0; i < size_acc; i++)
 		{
@@ -484,12 +484,12 @@ void Login(SOCKET client, vector<User>& Database, vector<User> Online, User& use
 	}
 	//show
 
-	cout << "Acc" << endl;
+	/*cout << "Acc" << endl;
 	cout << user.Account << endl;
 
 
 	cout << "Pass" << endl;
-	cout << user.Password << endl;
+	cout << user.Password << endl;*/
 
 	// Get Flag to respond to sever
 	int flag = Verify_Login(Database, user, true);
@@ -626,7 +626,7 @@ void Change_Password(SOCKET client, vector<User>& Database, User& user, bool enc
 
 	bool change = true;
 	// Rev Encrpt  
-	cout << "En" << endl;
+	/*cout << "En" << endl;*/
 	msg = RevEncrytMsg(client, false);
 
 
@@ -655,8 +655,8 @@ void Change_Password(SOCKET client, vector<User>& Database, User& user, bool enc
 
 	// Rev Changed Password
 	user.Password = RevEncrytMsg(client, encrypt);
-	cout << "Pass" << endl;
-	cout << user.Password << endl;
+	/*cout << "Pass" << endl;
+	cout << user.Password << endl;*/
 	change = true;
 
 
@@ -681,7 +681,7 @@ void Change_Password(SOCKET client, vector<User>& Database, User& user, bool enc
 void Check_User(SOCKET client, vector<User> Database, User user, string message) {
 	string option, username;
 	message = message.substr(strlen("CHECK_USER "));
-	cout << message << endl;
+	/*cout << message << endl;*/
 	int pos = message.find(" ");
 	option = message.substr(0, pos);
 	username = message.substr(pos + 1);
@@ -699,7 +699,7 @@ void Check_User(SOCKET client, vector<User> Database, User user, string message)
 			int count = 0;
 			for (int i = 0; i < Database.size(); ++i) {
 				if (Database[i].Account == username) {
-					cout << "Exist The Account " << endl;
+					/*cout << "Exist The Account " << endl;*/
 					int results = SentMsg(client, "CHECK_USER Exist");
 					count++;
 					break;
@@ -707,7 +707,7 @@ void Check_User(SOCKET client, vector<User> Database, User user, string message)
 				}
 			}
 			if (count != 1) {
-				cout << "Not have exist account" << endl;
+				/*cout << "Not have exist account" << endl;*/
 				int results = SentMsg(client, "NotExist");
 			}
 		}
@@ -741,7 +741,7 @@ void Check_User(SOCKET client, vector<User> Database, User user, string message)
 			int results = SentMsg(client, sendmsg);
 		}
 		else {
-			cout << msg << endl;
+			/*cout << msg << endl;*/
 			int results = SentMsg(client, msg);
 		}
 	}
@@ -752,7 +752,7 @@ void Check_User(SOCKET client, vector<User> Database, User user, string message)
 void Setup_Info(SOCKET client, vector<User>& Database, string message, User& user) {  // Fix By D
 	string option, information;
 	message = message.substr(strlen("SETUP_INFO "));
-	cout << message << endl;
+	/*cout << message << endl;*/
 	int pos = message.find(" ");
 	option = message.substr(0, pos);
 	information = message.substr(pos + 1);
@@ -770,7 +770,7 @@ void Setup_Info(SOCKET client, vector<User>& Database, string message, User& use
 		int results = SentMsg(client, "SETUP_INFO ");
 	}
 	else {
-		cout << msg << endl;
+		/*cout << msg << endl;*/
 		int results = SentMsg(client, msg);
 	}
 
@@ -908,11 +908,11 @@ void Send_Online_User(SOCKET client, vector<User> user) {
 		// Sent all user online list 
 		string s = FLag_Game_Sent(1);
 		s = s + user[i].Account;
-		cout << s << endl;
+		/*cout << s << endl;*/
 
 		if (i == user.size() - 1)
 		{
-			cout << "send flag enough" << endl;
+			/*cout << "send flag enough" << endl;*/
 			s = s + FlagSend(7);
 			int res = SentMsg(client, s);
 		}
@@ -926,10 +926,10 @@ void Send_Online_User(SOCKET client, vector<User> user) {
 void Rev_Responding_to_user_is_choosen(SOCKET client, string msg, vector<client_type>& client_array, int& P2_ID, int P1_ID, User user) {
 
 	string s = "CREATE_ROOM";
-	cout << "nguyen van :" << msg << endl;
+	/*cout << "nguyen van :" << msg << endl;*/
 	// Cut off the flag CREATE_ROOM
 	msg.erase(0, s.size() + 1);
-	cout << "sau khi xoa flag :" << msg << endl;
+	/*cout << "sau khi xoa flag :" << msg << endl;*/
 	// Now the mess like : "(room_number) User_ID"
 	s = "";
 	for (int i = 0; i < msg.rfind(" "); i++)
@@ -939,12 +939,12 @@ void Rev_Responding_to_user_is_choosen(SOCKET client, string msg, vector<client_
 	}
 	int room_number = stoi(s);
 
-	cout << "so phong" << room_number << endl;
+	/*cout << "so phong" << room_number << endl;*/
 	msg.erase(0, msg.rfind(" "));
-	cout << "sau khi lay so phong" << msg << endl;
+	/*cout << "sau khi lay so phong" << msg << endl;*/
 
 	// Now the mess like : "(room_number) User_ID"
-	cout << "lay so phong :" << msg << endl;
+	/*cout << "lay so phong :" << msg << endl;*/
 	P2_ID = stoi(msg);
 
 	// INVITE P2 to play game with P1
@@ -1035,7 +1035,7 @@ void ShutdownClient(SOCKET& client, vector<client_type>& client_array, int id) {
 	int Result = SentMsg(client, FlagSend(100));
 
 	// shut down client
-	cout << "Shut down client" << endl;
+	/*cout << "Shut down client" << endl;*/
 	closesocket(client);
 	closesocket(client_array[id].socket);
 	client_array[id].socket = INVALID_SOCKET;
@@ -1059,7 +1059,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 	int P2_ID = -1;
 	ServerShow(Database, UserOnline);
 	//Session 
-	cout << "client ID" << new_client.id << endl;
+	/*cout << "client ID" << new_client.id << endl;*/
 	while (1)
 	{
 		if (Open == false)
@@ -1068,12 +1068,12 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 		}
 		// Have Encry
 		msg = RevEncrytMsg(new_client.socket, encrypt);
-		cout << "Client sent :" << msg << endl;
+		/*cout << "Client sent :" << msg << endl;*/
 
 		int flag = FlagRev(msg);
 
 
-		cout << flag << endl;
+		/*cout << flag << endl;*/
 		switch (flag)
 		{
 
@@ -1087,10 +1087,10 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 
 			if (success)
 			{
-				cout << "Prepare Userlist" << endl;
+				/*cout << "Prepare Userlist" << endl;*/
 				Collect_Online_List(UserOnline);
 
-				cout << "Add new ogin user" << endl;
+				/*cout << "Add new ogin user" << endl;*/
 				Add_User_Online_File(UserOnline, user, new_client.id);
 				//	for (int i = 0; i < UserOnline.size(); i++)
 				//	{
@@ -1131,17 +1131,17 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 		case 20: // START_GAME
 		{
 
-			cout << "Prepare Userlist again" << endl;
+			/*cout << "Prepare Userlist again" << endl;*/
 			Collect_Online_List(UserOnline);
 
-			cout << "Starting send messs" << endl;
+			/*cout << "Starting send messs" << endl;*/
 			Send_Online_User(new_client.socket, UserOnline);
 
 			break;
 		}
 		case 21: // CREATE_ROOM
 		{
-			cout << "Starting send messs" << endl;
+			/*cout << "Starting send messs" << endl;*/
 			Rev_Responding_to_user_is_choosen(new_client.socket, msg, client_array, P2_ID, P1_ID, user);
 
 
@@ -1164,7 +1164,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 			Get_P2_ID(msg, P2_ID, "REJECT,P");
 			msg = "COMPERTITOR_REJECT";
 
-			cout << "P2 Reject to play" << endl;
+			/*cout << "P2 Reject to play" << endl;*/
 
 			int Result = SentMsg(client_array[P2_ID].socket, msg);
 			break;
@@ -1182,7 +1182,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 
 				// FLAG + filename.txt
 
-				cout << "Send Map and start game" << endl;
+				/*cout << "Send Map and start game" << endl;*/
 
 				int Result = SentMsg(client_array[P2_ID].socket, msg);
 			}
@@ -1196,7 +1196,7 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 
 				msg = flag_send + msg;
 
-				cout << "Send Map and want P2 take back Map" << endl;
+				/*cout << "Send Map and want P2 take back Map" << endl;*/
 
 				int Result = SentMsg(client_array[P2_ID].socket, msg);
 
@@ -1208,11 +1208,11 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 		{
 			// Sent P1 Attack back to P1 client
 			int Result = SentMsg(client_array[P1_ID].socket, msg);
-			cout << "Sent P1 Attack back to P1 client" << endl;
+			/*cout << "Sent P1 Attack back to P1 client" << endl;*/
 			// Notify to P2's turn
 			msg = FLag_Game_Sent(7);
 			Result = SentMsg(client_array[P2_ID].socket, msg);
-			cout << "Notify to P2's turn" << endl;
+			/*cout << "Notify to P2's turn" << endl;*/
 
 			break;
 		}
@@ -1220,10 +1220,10 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 		{
 
 
-			cout << "Prepare Userlist again" << endl;
+			/*cout << "Prepare Userlist again" << endl;*/
 			Collect_Online_List(UserOnline);
 
-			cout << "Starting send messs" << endl;
+			/*cout << "Starting send messs" << endl;*/
 			Send_Online_User(new_client.socket, UserOnline);
 
 			break;
@@ -1283,10 +1283,10 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 			Remove_Update_Online(UserOnline, user);
 
 			int Result = SentMsg(new_client.socket, FlagSend(100));
-			cout << "sent flag log out to p1" << endl;
+			/*cout << "sent flag log out to p1" << endl;*/
 			msg = "Client #" + std::to_string(new_client.id) + " Disconnected";
 
-			std::cout << msg << std::endl;
+			/*std::cout << msg << std::endl;*/
 
 			closesocket(new_client.socket);
 			closesocket(client_array[new_client.id].socket);
