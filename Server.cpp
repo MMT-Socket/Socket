@@ -407,16 +407,9 @@ int Change_Info(vector<User>& Database, User user, int flag) {
 	}
 
 	}
-	for (int i = 0; i < Database.size(); i++)
-	{
-		/*cout << Database[i].Account << "/" << Database[i].Password << endl;*/
-	}
+
 	Write_User_Info_To_Database(Database);
-	/*cout << "da viet lai " << endl;*/
-	for (int i = 0; i < Database.size(); i++)
-	{
-		/*cout << Database[i].Account << "/" << Database[i].Password << endl;*/
-	}
+
 	Upload_Database(Database);
 	//RIGISTER_SUCCESS
 	return 1;
@@ -1120,17 +1113,18 @@ int process_client(client_type& new_client, std::vector<client_type>& client_arr
 			break;
 		}
 		case 4: {   // Fix By D
-
+			Upload_Database(Database);
 			Check_User(new_client.socket, Database, user, msg);
 			break;
 		}
 		case 5: {   // Fix By D
-
+			Upload_Database(Database);
 			Setup_Info(new_client.socket, Database, msg, user);
 			break;
 		}
 		case 6: {
 			// FIX
+			Upload_Database(Database);
 			Point(new_client.socket, Database, msg, user);
 			break;
 		}
