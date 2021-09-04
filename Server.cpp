@@ -1006,7 +1006,10 @@ void ServerShow(vector<User> Database, vector<User>& User_Online) {
 
 		cout << endl;
 	}
-	cout << endl;
+	for (int i = 0; i < 4; i++)
+	{
+		cout << endl;
+	}
 	cout << setw(20) << "===USER_ONLINE===" << endl << endl;
 	cout << setw(31) << "<Name> // Online_ID // Point" << endl;
 	for (int i = 0; i < User_Online.size(); i++)
@@ -1026,7 +1029,10 @@ void ServerShow(vector<User> Database, vector<User>& User_Online) {
 
 		cout << endl;
 	}
-	cout << endl;
+	for (int i = 0; i < 4; i++)
+	{
+		cout << endl;
+	}
 	cout << "======================================================" << endl;
 }
 void ShutdownClient(SOCKET& client, vector<client_type>& client_array, int id) {
